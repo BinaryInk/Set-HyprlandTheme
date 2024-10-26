@@ -69,8 +69,7 @@ if (!$Mode) {
 # Edit Waybar
 "@import '$($Waybar["$Mode"])';" | Out-File $Waybar['Config'] -Force
 # Edit GTK
-Write-Host $GtkCss["$Mode"] 
-"@import '$($GtkCss.$Mode)';" | Out-File $Gtk['Config'] -Force
+"@import '$($GtkCss.$Mode)';" | Out-File $GtkCss['Config'] -Force
 Copy-Item -Path $GtkIni["$Mode"] -Destination $GtkIni['Config'] -Force
 # Edit QT/KDE
 & plasma-apply-colorscheme $Qt["$Mode"]
