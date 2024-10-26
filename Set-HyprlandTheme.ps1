@@ -1,0 +1,84 @@
+#!/usr/bin/env -S pwsh -NoProfile
+
+param(
+    # Theme mode to apply
+    [Parameter(Mandatory = $false, Position = 0)]
+    [string]
+    [ValidateSet('Light','Dark')]
+    $Mode
+)
+
+### Settings
+
+$Waybar = @{
+    Type = 'Replace';
+    Config = '~/.config/waybar/style.css';
+    Light = 'style-light.css';
+    Dark = 'style-dark.css';
+}
+$GtkCss = @{
+    Type = 'Edit';
+    Config = '~/.config/gtk-3.0/gtk.css';
+    Light = 'colors-light.css';
+    Dark = 'colors-dark.css';
+}
+$GtkIni = @{
+    Type = 'Replace';
+    Config = '~/.config/gtk-3.0/settings.ini'
+    Light = '~/.config/gtk-3.0/settings-light.ini'
+    Dark = '~/.config/gtk-3.0/settings-dark.ini'
+}
+$Qt = @{
+    Type = '';
+    Config = '';
+    Light = 'HyprlandLight';
+    Dark = 'BinaryInkBlack';
+}
+$Kitty = @{
+    Type = 'Replace';
+    Config = '~/.config/kitty/kitty.conf';
+    Light = '~/.config/kitty/kitty-light.conf';
+    Dark = '~/.config/kitty/kitty-dark.conf';
+}
+$Pwsh = @{
+    Type = 'Edit';
+    Config = '~/.config/powershell/powershell.d/00-env-theme.ps1';
+    Light = '$env:PWSH_THEME_LIGHT = 1';
+    Dark = '$env:PWSH_THEME_LIGHT = 0';
+}
+$Hyprland = @{
+    Type = 'Edit';
+    Config = '~/.config/hypr/hyprland.conf.d/theme-mode.conf';
+    Light = '$themeMode=light';
+    Dark = '$themeMode=dark';
+}
+$SuperProductivity = @{
+    Type = 'Replace';
+    Config = '~/.config/superProductivity/styles.css';
+    Light = '~/.config/superProductivity/styles-light.css';
+    Dark = '~/.config/superProductivity/styles-dark.css';
+}
+
+# TODO Toggle if not provided
+if (!$Mode) {
+
+}
+
+### Process
+
+# Edit Waybar
+"@import '$($Waybar["$Mode"])';" | Out-File $Waybar['Config'] -Force
+# Edit GTK
+Write-Host $GtkCss["$Mode"] 
+"@import '$($GtkCss.$Mode)';" | Out-File $Gtk['Config'] -Force
+Copy-Item -Path $GtkIni["$Mode"] -Destination $GtkIni['Config'] -Force
+# Edit QT/KDE
+& plasma-apply-colorscheme $Qt["$Mode"]
+# Edit Kitty
+Copy-Item -Path $Kitty["$Mode"] -Destination $Kitty["Config"] -Force
+# Edit Pwsh
+$Pwsh["$Mode"] | Out-File -FilePath $Pwsh["Config"] -Force
+# Edit Hyprland
+$Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
+# Edit superProductivity
+Copy-Item -Path $SuperProductivity["$Mode"] -Destination $SuperProductivity["Config"] -Force
