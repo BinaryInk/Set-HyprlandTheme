@@ -10,6 +10,8 @@ param(
 
 ### Settings
 
+$Hostname = Get-Content '/etc/hostname'
+
 $Waybar = @{
     Type = 'Replace';
     Config = '~/.config/waybar/style.css';
@@ -58,6 +60,18 @@ $SuperProductivity = @{
     Light = '~/.config/superProductivity/styles-light.css';
     Dark = '~/.config/superProductivity/styles-dark.css';
 }
+$Rofi = @{
+    Type = 'Replace';
+    Config = '~/.config/rofi/current.rasi';
+    Light = '~/.config/rofi/light.rasi';
+    Dark = '~/.config/rofi/dark.rasi';
+}
+$Dunst = @{
+    Type = 'Replace';
+    Config = '~/.config/dunst/dunstrc';
+    Light = "~/.config/dunst/dunstrc_$($Hostname)_light"
+    Dark = "~/.config/dunst/dunstrc_$($Hostname)_dark"
+}
 
 # TODO Toggle if not provided
 if (!$Mode) {
@@ -81,3 +95,7 @@ $Pwsh["$Mode"] | Out-File -FilePath $Pwsh["Config"] -Force
 $Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
 # Edit superProductivity
 Copy-Item -Path $SuperProductivity["$Mode"] -Destination $SuperProductivity["Config"] -Force
+# Edit dunst
+Copy-Item -Path $Dunst["$Mode"] -Destination $Dunst["Config"]
+# Edit rofi
+Copy-Item -Path $Rofi["$Rofi"] -Destination $Dunst["Config"]
