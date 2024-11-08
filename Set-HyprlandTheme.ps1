@@ -90,6 +90,8 @@ if (!$Mode) {
 # Edit GTK
 "@import '$($GtkCss.$Mode)';" | Out-File $GtkCss['Config'] -Force
 Copy-Item -Path $GtkIni["$Mode"] -Destination $GtkIni['Config'] -Force
+# Refresh GTK
+gsettings set org.gnome.desktop.interface gtk-theme 'Breeze-Dark'
 # Edit QT/KDE
 & plasma-apply-colorscheme $Qt["$Mode"]
 # Edit Kitty
@@ -100,8 +102,10 @@ $Pwsh["$Mode"] | Out-File -FilePath $Pwsh["Config"] -Force
 $Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
 # Edit superProductivity
 Copy-Item -Path $SuperProductivity["$Mode"] -Destination $SuperProductivity["Config"] -Force
-# Edit dunst
+# Edit & restart dunst
 Copy-Item -Path $Dunst["$Mode"] -Destination $Dunst["Config"]
+killall dunst
+systemctl start dunst --user
 # Edit rofi
 Copy-Item -Path $Rofi["$Rofi"] -Destination $Dunst["Config"]
 # Edit Cursor
