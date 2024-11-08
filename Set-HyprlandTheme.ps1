@@ -77,6 +77,13 @@ $Cursor = @{
     Light = 'Bibata-Modern-Ice'
     Dark = 'Bibata-Modern-Classic'
 }
+$Taskwarrior = @{
+    Type = 'Edit'
+    Config = "$HOME/.taskrc"
+    Light = 'light-256.theme'
+    Dark = 'dark-256.theme'
+    Pattern = '(?<=^|\s)(\w+-\w+)\.theme(?=\s|$)'
+}
 
 # TODO Toggle if not provided
 if (!$Mode) {
@@ -111,3 +118,7 @@ Copy-Item -Path $Rofi["$Rofi"] -Destination $Dunst["Config"]
 # Edit Cursor
 gsettings set org.gnome.desktop.interface cursor-theme $Cursor["$Mode"]
 hyprctl setcursor $Cursor["$Mode"] 24
+# Edit TaskWarrior
+Get-Content $Taskwarrior.Config | 
+    ForEach-Object { $_ -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"] } |
+    Set-Content
