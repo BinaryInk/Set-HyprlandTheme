@@ -72,6 +72,11 @@ $Dunst = @{
     Light = "~/.config/dunst/dunstrc_$($Hostname)_light"
     Dark = "~/.config/dunst/dunstrc_$($Hostname)_dark"
 }
+$Cursor = @{
+    Type = 'Set'
+    Light = 'Bibata-Modern-Ice'
+    Dark = 'Bibata-Modern-Classic'
+}
 
 # TODO Toggle if not provided
 if (!$Mode) {
@@ -99,3 +104,6 @@ Copy-Item -Path $SuperProductivity["$Mode"] -Destination $SuperProductivity["Con
 Copy-Item -Path $Dunst["$Mode"] -Destination $Dunst["Config"]
 # Edit rofi
 Copy-Item -Path $Rofi["$Rofi"] -Destination $Dunst["Config"]
+# Edit Cursor
+gsettings set org.gnome.desktop.interface cursor-theme $Cursor["$Mode"]
+hyprctl setcursor $Cursor["$Mode"] 24
