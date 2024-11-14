@@ -114,11 +114,11 @@ Copy-Item -Path $Dunst["$Mode"] -Destination $Dunst["Config"]
 killall dunst
 systemctl start dunst --user
 # Edit rofi
-Copy-Item -Path $Rofi["$Rofi"] -Destination $Dunst["Config"]
+Copy-Item -Path $Rofi["$Mode"] -Destination $Rofi["Config"]
 # Edit Cursor
 gsettings set org.gnome.desktop.interface cursor-theme $Cursor["$Mode"]
 hyprctl setcursor $Cursor["$Mode"] 24
 # Edit TaskWarrior
-Get-Content $Taskwarrior.Config | 
-    ForEach-Object { $_ -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"] } |
-    Set-Content
+$TaskwarriorContent = Get-Content $Taskwarrior["Config"]
+$TaskwarriorContent = $TaskwarriorContent -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"]
+$TaskwarriorContent | Set-Content $Taskwarrior["Config"]
