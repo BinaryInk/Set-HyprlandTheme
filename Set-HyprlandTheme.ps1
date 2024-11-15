@@ -79,7 +79,7 @@ $Cursor = @{
 }
 $Taskwarrior = @{
     Type = 'Edit'
-    Config = "$HOME/.taskrc"
+    Config = "$HOME/.config/task/theme"
     Light = 'light-256.theme'
     Dark = 'dark-256.theme'
     Pattern = '(?<=^|\s)(\w+-\w+)\.theme(?=\s|$)'
