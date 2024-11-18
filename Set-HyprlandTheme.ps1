@@ -68,9 +68,9 @@ $Rofi = @{
 }
 $Dunst = @{
     Type = 'Replace';
-    Config = '~/.config/dunst/dunstrc';
-    Light = "~/.config/dunst/dunstrc_$($Hostname)_light"
-    Dark = "~/.config/dunst/dunstrc_$($Hostname)_dark"
+    Config = '~/.config/dunst/dunstrc/dunstrc.d/98-theme.conf';
+    Light = "~/.config/dunst/themes/vscode-light.conf"
+    Dark = "~/.config/dunst/themes/vscode-dark.conf"
 }
 $Cursor = @{
     Type = 'Set'
