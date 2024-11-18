@@ -68,7 +68,7 @@ $Rofi = @{
 }
 $Dunst = @{
     Type = 'Replace';
-    Config = '~/.config/dunst/dunstrc/dunstrc.d/98-theme.conf';
+    Config = '~/.config/dunst/dunstrc.d/98-theme.conf';
     Light = "~/.config/dunst/themes/vscode-light.conf"
     Dark = "~/.config/dunst/themes/vscode-dark.conf"
 }
