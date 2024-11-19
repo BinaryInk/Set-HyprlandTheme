@@ -105,8 +105,6 @@ gsettings set org.gnome.desktop.interface gtk-theme 'Breeze-Dark'
 Copy-Item -Path $Kitty["$Mode"] -Destination $Kitty["Config"] -Force
 # Edit Pwsh
 $Pwsh["$Mode"] | Out-File -FilePath $Pwsh["Config"] -Force
-# Edit Hyprland
-$Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
 # Edit superProductivity
 Copy-Item -Path $SuperProductivity["$Mode"] -Destination $SuperProductivity["Config"] -Force
 # Edit & restart dunst
@@ -122,3 +120,7 @@ hyprctl setcursor $Cursor["$Mode"] 24
 $TaskwarriorContent = Get-Content $Taskwarrior["Config"]
 $TaskwarriorContent = $TaskwarriorContent -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"]
 $TaskwarriorContent | Set-Content $Taskwarrior["Config"]
+
+# Edit Hyprland
+$Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
+& hyprctl reload
