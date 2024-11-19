@@ -52,8 +52,6 @@ catch {
 
 ### Settings
 
-$Hostname = Get-Content '/etc/hostname'
-
 $Waybar = @{
     Type = 'Replace';
     Config = '~/.config/waybar/style.css';
