@@ -5,8 +5,50 @@ param(
     [Parameter(Mandatory = $false, Position = 0)]
     [string]
     [ValidateSet('Light','Dark')]
-    $Mode
+    $Mode,
+
+    # Config file path
+    [Parameter(Mandatory = $false, Position = 1)]
+    [string]
+    $ConfigPath
 )
+
+New-Variable -Name 'DefaultConfigPaths' `
+             -Option 'Constant' `
+             -Value @(
+                "$PSScriptRoot/config.json",
+                "$HOME/.config/Set-HyprlandTheme/config.json",
+                "$HOME/.config/hypr/Set-HyprlandTheme/config.json",
+                "$HOME/.config/hypr/Set-HyprlandTheme.json"
+             )
+[psobject]$Config
+
+# Check for config file
+if (!$ConfigPath) {
+    # Check default locations for config file
+    foreach ($path in $DefaultConfigPaths) {
+        if (Test-Path $path) {
+            Write-Debug "Found config file: '$path'"
+            $ConfigPath = $path
+        }
+    }
+}
+else {
+    if (!$(Test-Path $ConfigPath)) {
+        throw "Config not found: '${Config}'"
+    }
+    elseif (!$([System.IO.Path]::GetExtension()) -ne '.json') {
+        throw "Config not a json file"
+    }
+}
+
+# Load config
+try {
+    $Config = Get-Content $ConfigPath | ConvertFrom-Json
+}
+catch {
+    throw 'Cannot load config JSON.'
+}
 
 ### Settings
 
