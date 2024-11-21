@@ -21,7 +21,25 @@ New-Variable -Name 'DefaultConfigPaths' `
                 "$HOME/.config/hypr/Set-HyprlandTheme/config.json",
                 "$HOME/.config/hypr/Set-HyprlandTheme.json"
              )
+New-Variable -Name 'OptionalCliUtilityList' `
+             -Option 'Constant' `
+             -Value @(
+                'gsettings',
+                'plasma-apply-colorscheme'
+             )
 [psobject]$Config
+[System.Collections.Generic.Dictionary[string,bool]]$OptionalCliUtilities = @{}
+
+foreach ($cmd in $OptionalCliUtilityList) {
+    [bool]$found = which $cmd ? $true : $false
+    if ($found) {
+        Write-Debug "Optional CLI Utility '$cmd' found."
+    }
+    else {
+        Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+    }
+    $OptionalCliUtilities.Add($cmd, $found)
+}
 
 # Check for config file
 if (!$ConfigPath) {
@@ -50,15 +68,76 @@ catch {
     throw 'Cannot load config JSON.'
 }
 
-### Settings
-
-
-# TODO Toggle if not provided
-if (!$Mode) {
-
-}
-
 ### Process
+Write-Host "Switching to ${Mode} Mode..."
+foreach ($item in $Config) {
+    $appName = $item.appName
+    Write-Host "Switching $appName..."
+
+    $type = $item.type
+    Write-Verbose "Config Type: $type"
+    
+    $path = $item.path
+    Write-Verbose "Config File: $path"
+    
+    $pathFound = Test-Path $pathFound
+    if (!$pathFound) {
+        Write-Warning "Config file: $path does not exist!" 
+    }
+    else {
+        Write-Verbose 'Config file exists.'
+    }
+    $modeString = $item.modes.$Mode
+    Write-Verbose "Config Mode String; $modeString"
+    if ($item.pattern) {
+        $pattern = $item.pattern
+        Write-Verbose "Config Pattern: $pattern"
+    }
+    switch ($item.type) {
+        'FileContents' {
+            try { $modeString | Out-File $path }
+            catch { Write-Warning "Unable to write to $path" }
+        }
+        'KDE' {
+            if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
+                try { & plasma-apply-colorscheme $modeString }
+                catch { Write-Warning "plasma-apply-colorscheme failed to set $modeString" }
+            }
+            else {
+                Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
+            }
+        }
+        'ReplaceFile' {
+            if (!$(Test-Path $modeString)) {
+                Write-Warning "Config File Replacement: $modeString does not exist!"
+            }
+            else {
+                try { Copy-Item -Path $modeString -Destination $path -Force }
+                catch { Write-Warning "Failed to overwrite $path" }
+            }
+        }
+        'Cursor' {
+            if ($OptionalCliUtilities['gsettings']) {
+                try {
+                    gsettings set org.gnome.desktop.interface cursor-theme $modeString
+                }
+                catch {
+                    Write-Warning "Failed to set cursor via gsettings"
+                }
+            }
+            # Handle KDE
+            try { hyprctl setcursor $modeString}
+            catch { Write-Error "Failed to set cursor via hyprctl!"}
+        }
+        'PatternReplace' {
+            # Handle file existence
+            # Handle pattern validit
+        }
+        Default {
+            Write-Warning "Unknown Config Type: $type"
+        }
+    }
+}
 
 # Edit Waybar
 "@import '$($Waybar["$Mode"])';" | Out-File $Waybar['Config'] -Force

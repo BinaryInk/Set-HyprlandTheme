@@ -2,20 +2,20 @@
     "applications": [
         {
             "appName": "Waybar",
-            "type": "ReplaceFile",
+            "type": "FileContents",
             "path": "~/.config/waybar/style.css",
             "modes": {
-                "Light": "~/.config/waybar/style-light.css",
-                "Dark": "~/.config/waybar/style-dark.css"
-            }            
+                "Light": "@import '~/.config/waybar/style-light.css';",
+                "Dark": "@import '~/.config/waybar/style-dark.css';"
+            }
         },
         {
             "appName": "GTK3-css",
-            "type": "ReplaceFile",
+            "type": "FileContents",
             "path": "~/.config/gtk-3.0/gtk.css",
             "modes": {
-                "Light": "~/.config/gtk-3.0/colors-dark.css",
-                "Dark": "~/.config/gtk-3.0/colors-light.css"
+                "Light": "@import '~/.config/gtk-3.0/colors-dark.css'",
+                "Dark": "@import '~/.config/gtk-3.0/colors-light.css'"
             }
         },
         {
@@ -84,8 +84,8 @@
             "appName": "Cursor",
             "type": "Cursor",
             "mode": {
-                "Light": "Bibata-Modern-Ice",
-                "Dark": "Bibata-Modern-Classic"
+                "Light": "Bibata-Modern-Ice 24",
+                "Dark": "Bibata-Modern-Classic 24"
             }
         },
         {
