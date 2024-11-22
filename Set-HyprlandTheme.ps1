@@ -84,6 +84,12 @@ $Taskwarrior = @{
     Dark = 'dark-256.theme'
     Pattern = '(?<=^|\s)(\w+-\w+)\.theme(?=\s|$)'
 }
+$Clipse = @{
+    Type = 'Replace'
+    Config = "$HOME/.config/clipse/custom_theme.json"
+    Light = "$HOME/.config/clipse/themes/vscode_light.json"
+    Dark = "$HOME/.config/clipse/themes/vscode_dark.json"
+}
 
 # TODO Toggle if not provided
 if (!$Mode) {
@@ -120,6 +126,8 @@ hyprctl setcursor $Cursor["$Mode"] 24
 $TaskwarriorContent = Get-Content $Taskwarrior["Config"]
 $TaskwarriorContent = $TaskwarriorContent -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"]
 $TaskwarriorContent | Set-Content $Taskwarrior["Config"]
+# Edit Clipse
+Copy-Item -Path $Clipse["$Mode"] -Destination $Clipse["Config"] -Force`
 
 # Edit Hyprland
 $Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
