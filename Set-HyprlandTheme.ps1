@@ -82,8 +82,8 @@ begin {
     Write-Debug "Checking config entries..."
     foreach ($item in $Config.applications) {
         Write-Debug "Checking config path for '$($item.appName)'..."
-        if ($item.type -eq 'Cursor' -or $item.type -eq 'KDE QT') {
-            Write-Debug "$($item.type) has no path to check."
+        if ($item.type -eq 'Cursor' -or $item.type -eq 'KDE') {
+            Write-Debug "Config type '$($item.type)' has no path to check."
             continue
         }
         if (!$(Test-Path $item.path)) {
@@ -100,8 +100,8 @@ process {
         if ($AppsNotFound -contains $item.appName) { continue }
 
         Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
-        if ($item.preCommand -eq "" -or
-            $null -eq $item.preCommand) {
+        if ($item.preCommand -ne "" -and
+            $null -ne $item.preCommand) {
             if ($WhatIfPreference -eq $true) {
                 Write-Host "What if: Invoking expression: $($item.preCommand)"
             }
@@ -190,7 +190,7 @@ process {
             }
         }
 
-        if ($item.postCommand -ne "" -or
+        if ($item.postCommand -ne "" -and
             $null -ne $item.postCommand) {
             Write-Debug "Attempting to Run postCommand '$($item.postCommand)'..."
             if ($WhatIfPreference -eq $true) {
