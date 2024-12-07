@@ -59,10 +59,16 @@ begin {
         if (!$(Test-Path $ConfigPath)) {
             throw "Config not found: '${Config}'"
         }
-        elseif (!$([System.IO.Path]::GetExtension($ConfigPath)) -ne 'json' -or
-                !$([System.IO.Path]::GetExtension($ConfigPath)) -ne 'jsonc') {
+        else {
+            [string]$ConfigExtension = Get-ChildItem -Path $ConfigPath | 
+                Select-Object -ExpandProperty 'Extension'
+        }
+
+        if ($ConfigExtension -ne '.json' -and
+            $ConfigExtension -ne '.jsonc') {
             throw "Config file extension indicates the provided config file is not a json file."
         }
+        Remove-Variable -Name 'ConfigExtension' 
     }
 
     Write-Debug "Loading config file ($ConfigPath)..."
