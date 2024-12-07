@@ -95,13 +95,14 @@ begin {
 
 process {
     foreach ($item in $Config.applications) {
-        Write-Host "Switching $($item.appName) to $($item.mode) Mode..."
+        Write-Host "Switching $($item.appName) to $Mode Mode..."
 
         if ($AppsNotFound -contains $item.appName) { continue }
 
-        Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
+        Write-Debug "Checking for preCommand..."
         if ($item.preCommand -ne "" -and
             $null -ne $item.preCommand) {
+            Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
             if ($WhatIfPreference -eq $true) {
                 Write-Host "What if: Invoking expression: $($item.preCommand)"
             }
