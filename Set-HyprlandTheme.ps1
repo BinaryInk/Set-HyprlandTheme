@@ -2,6 +2,10 @@
 
 using namespace System.Collections.Generic
 
+[CmdletBinding(
+    SupportsShouldProcess = $true
+)]
+
 param(
     # Theme mode to apply
     [Parameter(Mandatory = $false, Position = 0)]
@@ -96,27 +100,43 @@ process {
         if ($AppsNotFound -contains $item.appName) { continue }
 
         Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
-        if ($item.preCommand -ne "" -or
-        $null -ne $item.preCommand) {
-            try { 
-                Invoke-Expression -Command $item.preCommand 
+        if ($item.preCommand -eq "" -or
+            $null -eq $item.preCommand) {
+            if ($WhatIfPreference -eq $true) {
+                Write-Host "What if: Invoking expression: $($item.preCommand)"
             }
-            catch {
-                Write-Error "Unable to execute preCommand ($($item.preCommand))"
-                Write-Warning "Skipping switching $($item.appName)!"
-                continue
+            else {
+                try {
+                    Invoke-Expression -Command $item.preCommand
+                }
+                catch {
+                    Write-Error "Unable to execute preCommand ($($item.preCommand))"
+                    Write-Warning "Skipping switching $($item.appName)!"
+                    continue
+                }
             }
         }
 
         switch ($item.type) {
             'FileContents' {
-                try { $item.mode.$Mode | Out-File $item.path }
+                try { $item.mode.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
             'KDE QT' {
                 if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
-                    try { & plasma-apply-colorscheme $item.mode.$Mode }
-                    catch { Write-Error "plasma-apply-colorscheme failed to set $($item.mode.$Mode)" }
+                    $cmd = "plasma-apply-colorscheme $($item.mode.$Mode)"
+
+                    if ($WhatIfPreference -eq $true) {
+                        Write-Host "What if: Invoking expression: $cmd"
+                    }
+                    else {
+                        try { 
+                            Invoke-Expression $cmd 
+                        }
+                        catch { 
+                            Write-Error "plasma-apply-colorscheme failed to set $($item.mode.$Mode)" 
+                        }
+                    }
                 }
                 else {
                     Write-Error 'KDE QT: Unable to set color scheme via plasma-apply-colorscheme!'
@@ -127,27 +147,43 @@ process {
                     Write-Error "Config File Replacement: $($item.mode.$Mode) does not exist!"
                 }
                 else {
-                    try { Copy-Item -Path $item.mode.$Mode -Destination $item.path -Force }
+                    try { 
+                        Copy-Item -Path $item.mode.$Mode `
+                                  -Destination $item.path `
+                                  -WhatIf:$WhatIfPreference `
+                                  -Force
+                    }
                     catch { Write-Error "Failed to overwrite $($item.path)" }
                 }
             }
             'Cursor' {
                 if ($OptionalCliUtilities['gsettings']) {
-                    try {
-                        Invoke-Expression "gsettings set org.gnome.desktop.interface cursor-theme $($item.mode.$Mode)"
+                    $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $($item.mode.$Mode)"
+                    if ($WhatIfPreference -eq $true) {
+                        Write-Host "What if: Invoking expression: $cmd)"
                     }
-                    catch {
-                        Write-Error "Failed to set cursor via gsettings"
+                    else {
+                        try {
+                            Invoke-Expression $cmd
+                        }
+                        catch {
+                            Write-Error "Failed to set cursor via gsettings"
+                        }
                     }
                 }
                 # Handle KDE
-                try { hyprctl setcursor $item.mode.$Mode}
-                catch { Write-Error "Failed to set cursor via hyprctl!"}
+                if ($WhatIfPreference -eq $true) {
+                    Write-Host "What if: Invoking expression: $cmd"
+                }
+                else {
+                    try { hyprctl setcursor $item.mode.$Mode}
+                    catch { Write-Error "Failed to set cursor via hyprctl!"}
+                }
             }
             'PatternReplace' {
                 $FileContent = Get-Content $item.path
                 $FileContent = $FileContent -replace $item.pattern,$item.mode.$Mode
-                $FileContent | Set-Content $item.path
+                $FileContent | Set-Content $item.path -WhatIf:$WhatIfPreference
             }
             Default {
                 Write-Error "Unknown Config Type: $($item.type)"
@@ -157,13 +193,18 @@ process {
         if ($item.postCommand -ne "" -or
             $null -ne $item.postCommand) {
             Write-Debug "Attempting to Run postCommand '$($item.postCommand)'..."
-            try { 
-                Invoke-Expression -Command $item.postCommand 
+            if ($WhatIfPreference -eq $true) {
+                Write-Host "What if: Invoking expression: $($item.preCommand)"
             }
-            catch {
-                Write-Error "Unable to execute postCommand ($($item.postCommand))"
-                Write-Warning "Please check the state of $($item.appName) due to this failure."
-                continue
+            else {
+                try { 
+                    Invoke-Expression -Command $item.postCommand 
+                }
+                catch {
+                    Write-Error "Unable to execute postCommand ($($item.postCommand))"
+                    Write-Warning "Please check the state of $($item.appName) due to this failure."
+                    continue
+                }
             }
         }
     }
