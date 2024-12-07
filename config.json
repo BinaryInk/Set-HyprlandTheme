@@ -16,8 +16,8 @@
             "type": "FileContents",
             "path": "~/.config/gtk-3.0/gtk.css",
             "modes": {
-                "Light": "@import 'colors-light.css'",
-                "Dark": "@import 'colors-dark.css'"
+                "Light": "@import 'colors-light.css';",
+                "Dark": "@import 'colors-dark.css';"
             },
             "preCommand": "",
             "postCommand": ""
