@@ -76,7 +76,7 @@ begin {
     catch { throw 'Cannot load config JSON.' }
 
     Write-Debug "Checking config entries..."
-    foreach ($item in $Config) {
+    foreach ($item in $Config.applications) {
         Write-Debug "Checking config entry for '$($item.appName)'..."
         if (!$(Test-Path $item.path)) {
             Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
@@ -89,7 +89,7 @@ process {
     Write-Host "Switching $($item.appName) to $($item.mode) Mode..."
 
     Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
-    foreach ($item in $Config) {
+    foreach ($item in $Config.applications) {
         if ($AppsNotFound -contains $item.appName) { continue }
 
         if ($item.preCommand -ne "" -or
