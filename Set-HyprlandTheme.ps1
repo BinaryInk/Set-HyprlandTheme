@@ -61,8 +61,9 @@ else {
     if (!$(Test-Path $ConfigPath)) {
         throw "Config not found: '${Config}'"
     }
-    elseif (!$([System.IO.Path]::GetExtension()) -ne '.json') {
-        throw "Config not a json file"
+    elseif (!$([System.IO.Path]::GetExtension($ConfigPath)) -ne 'json' -or
+            !$([System.IO.Path]::GetExtension($ConfigPath)) -ne 'jsonc') {
+        throw "Config file extension indicates the provided config file is not a json file."
     }
 }
 
