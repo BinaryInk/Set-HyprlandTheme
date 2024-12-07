@@ -102,13 +102,13 @@ process {
                 try { $modeString | Out-File $item.path }
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
-            'KDE' {
+            'KDE QT' {
                 if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
                     try { & plasma-apply-colorscheme $modeString }
                     catch { Write-Error "plasma-apply-colorscheme failed to set $modeString" }
                 }
                 else {
-                    Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
+                    Write-Error 'KDE QT: Unable to set color scheme via plasma-apply-colorscheme!'
                 }
             }
             'ReplaceFile' {
