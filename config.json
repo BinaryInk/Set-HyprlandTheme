@@ -101,7 +101,7 @@
         {
             "appName": "Cursor",
             "type": "Cursor",
-            "mode": {
+            "modes": {
                 "Light": "Bibata-Modern-Ice 24",
                 "Dark": "Bibata-Modern-Classic 24"
             },
@@ -113,7 +113,7 @@
             "type": "PatternReplace",
             "path": "~/.config/task/theme",
             "pattern": "(?<=^|\\s)(\\w+-\\w+)\\.theme(?=\\s|$)",
-            "mode": {
+            "modes": {
                 "Light": "light-256.theme",
                 "Dark": "dark-256.theme"
             },
