@@ -84,7 +84,6 @@ process {
     Write-Host "Switching $($item.appName) to $($item.mode) Mode..."
 
     Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
-
     foreach ($item in $Config) {
         if ($AppsNotFound -contains $item.appName) { continue }
 
@@ -99,38 +98,38 @@ process {
 
         switch ($item.type) {
             'FileContents' {
-                try { $modeString | Out-File $item.path }
+                try { $item.mode.$Mode | Out-File $item.path }
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
             'KDE QT' {
                 if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
-                    try { & plasma-apply-colorscheme $modeString }
-                    catch { Write-Error "plasma-apply-colorscheme failed to set $modeString" }
+                    try { & plasma-apply-colorscheme $item.mode.$Mode }
+                    catch { Write-Error "plasma-apply-colorscheme failed to set $($item.mode.$Mode)" }
                 }
                 else {
                     Write-Error 'KDE QT: Unable to set color scheme via plasma-apply-colorscheme!'
                 }
             }
             'ReplaceFile' {
-                if (!$(Test-Path $modeString)) {
-                    Write-Error "Config File Replacement: $modeString does not exist!"
+                if (!$(Test-Path $item.mode.$Mode)) {
+                    Write-Error "Config File Replacement: $($item.mode.$Mode) does not exist!"
                 }
                 else {
-                    try { Copy-Item -Path $modeString -Destination $item.path -Force }
+                    try { Copy-Item -Path $item.mode.$Mode -Destination $item.path -Force }
                     catch { Write-Error "Failed to overwrite $($item.path)" }
                 }
             }
             'Cursor' {
                 if ($OptionalCliUtilities['gsettings']) {
                     try {
-                        iex "gsettings set org.gnome.desktop.interface cursor-theme $modeString"
+                        Invoke-Expression "gsettings set org.gnome.desktop.interface cursor-theme $($item.mode.$Mode)"
                     }
                     catch {
                         Write-Error "Failed to set cursor via gsettings"
                     }
                 }
                 # Handle KDE
-                try { hyprctl setcursor $modeString}
+                try { hyprctl setcursor $item.mode.$Mode}
                 catch { Write-Error "Failed to set cursor via hyprctl!"}
             }
             'PatternReplace' {
