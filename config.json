@@ -7,7 +7,9 @@
             "modes": {
                 "Light": "@import '~/.config/waybar/style-light.css';",
                 "Dark": "@import '~/.config/waybar/style-dark.css';"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "GTK3-css",
@@ -16,7 +18,9 @@
             "modes": {
                 "Light": "@import '~/.config/gtk-3.0/colors-dark.css'",
                 "Dark": "@import '~/.config/gtk-3.0/colors-light.css'"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "GTK3-ini",
@@ -25,7 +29,9 @@
             "modes": {
                 "Light": "~/.config/gtk-3.0/settings-light.ini",
                 "Dark": "~/.config/gtk-3.0/settings-dark.ini"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "KDE QT",
@@ -33,7 +39,9 @@
             "modes": {
                 "Light": "HyprlandLight",
                 "Dark": "BinaryInkBlack"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "Kitty",
@@ -42,7 +50,9 @@
             "modes": {
                 "Light": "~/.config/kitty/kitty-light.conf",
                 "Dark": "~/.config/kitty/kitty-dark.conf"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "PowerShell",
@@ -51,7 +61,9 @@
             "modes": {
                 "Light": "$env:PWSH_THEME_LIGHT = 1",
                 "Dark": "$env:PWSH_THEME_LIGHT = 0"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "Hyprland",
@@ -60,7 +72,9 @@
             "modes": {
                 "Light": "$themeMode = light",
                 "Dark": "$themeMode = dark"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "Rofi",
@@ -69,16 +83,20 @@
             "modes": {
                 "Light": "~/.config/rofi/light.rasi",
                 "Dark": "~/.config/rofi/dark.rasi"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "Dunst",
-            "mode": "ReplaceFile",
+            "type": "ReplaceFile",
             "path": "~/.config/dunst/dunstrc.d/98-theme.conf",
             "modes": {
                 "Light": "~/.config/dunst/themes/vscode-light.conf",
                 "Dark": "~/.config/dunst/themes/vscode-dark.conf"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "Cursor",
@@ -86,7 +104,9 @@
             "mode": {
                 "Light": "Bibata-Modern-Ice 24",
                 "Dark": "Bibata-Modern-Classic 24"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
         },
         {
             "appName": "Taskwarrior",
@@ -96,7 +116,20 @@
             "mode": {
                 "Light": "light-256.theme",
                 "Dark": "dark-256.theme"
-            }
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Clipse",
+            "type": "ReplaceFile",
+            "path": "~/.config/clipse/custom_theme.json",
+            "modes": {
+                "Light": "~/.config/clipse/themes/vscode_light.json",
+                "Dark": "~/.config/clipse/themes/vscode_dark.json"
+            },
+            "preCommand": "",
+            "postCommand": ""
         }
     ]
 }
