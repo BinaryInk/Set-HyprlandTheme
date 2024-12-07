@@ -133,8 +133,9 @@ process {
                 catch { Write-Error "Failed to set cursor via hyprctl!"}
             }
             'PatternReplace' {
-                # Handle file existence
-                # Handle pattern validit
+                $FileContent = Get-Content $item.path
+                $FileContent = $FileContent -replace $item.pattern,$item.mode.$Mode
+                $FileContent | Set-Content $item.path
             }
             Default {
                 Write-Error "Unknown Config Type: $($item.type)"
@@ -192,9 +193,7 @@ end {}
 # hyprctl setcursor $Cursor["$Mode"] 24
 
 # # Edit TaskWarrior
-# $TaskwarriorContent = Get-Content $Taskwarrior["Config"]
-# $TaskwarriorContent = $TaskwarriorContent -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"]
-# $TaskwarriorContent | Set-Content $Taskwarrior["Config"]
+
 
 # # Edit Clipse
 # Copy-Item -Path $Clipse["$Mode"] -Destination $Clipse["Config"] -Force`
