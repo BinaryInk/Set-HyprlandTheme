@@ -5,8 +5,8 @@
             "type": "FileContents",
             "path": "~/.config/waybar/style.css",
             "modes": {
-                "Light": "@import '~/.config/waybar/style-light.css';",
-                "Dark": "@import '~/.config/waybar/style-dark.css';"
+                "Light": "@import 'style-light.css';",
+                "Dark": "@import 'style-dark.css';"
             },
             "preCommand": "",
             "postCommand": ""
