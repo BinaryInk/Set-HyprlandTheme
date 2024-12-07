@@ -1,5 +1,7 @@
 #!/usr/bin/env -S pwsh -NoProfile
 
+using namespace System.Collections.Generic
+
 param(
     # Theme mode to apply
     [Parameter(Mandatory = $false, Position = 0)]
@@ -14,8 +16,6 @@ param(
 )
 
 begin {
-    Add-Type -AssemblyName 'System.Collections.Generic'
-
     New-Variable -Name 'DefaultConfigPaths' `
                  -Option 'Constant' `
                  -Value @(
