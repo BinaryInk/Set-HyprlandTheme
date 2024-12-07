@@ -89,12 +89,12 @@ begin {
 }
 
 process {
-    Write-Host "Switching $($item.appName) to $($item.mode) Mode..."
-
-    Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
     foreach ($item in $Config.applications) {
+        Write-Host "Switching $($item.appName) to $($item.mode) Mode..."
+
         if ($AppsNotFound -contains $item.appName) { continue }
 
+        Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
         if ($item.preCommand -ne "" -or
         $null -ne $item.preCommand) {
             try { 
