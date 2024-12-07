@@ -77,7 +77,10 @@ begin {
 
     Write-Debug "Checking config entries..."
     foreach ($item in $Config.applications) {
-        Write-Debug "Checking config entry for '$($item.appName)'..."
+        Write-Debug "Checking config path for '$($item.appName)'..."
+        if ($item.type -eq 'Cursor' -or $item.type -eq 'KDE QT') {
+            Write-Debug "$($item.type) has no path to check."
+        }
         if (!$(Test-Path $item.path)) {
             Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
             $AppsNotFound.Add($item.appName)
