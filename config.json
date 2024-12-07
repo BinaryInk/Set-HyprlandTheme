@@ -130,6 +130,16 @@
             },
             "preCommand": "",
             "postCommand": ""
+        },
+        {
+            "appName": "Starship",
+            "type": "PatternReplace",
+            "path": "~/.config/starship/starship.toml",
+            "pattern": "(?<=palette\\s*=\\s*\").*?(?=\")",
+            "modes": {
+                "Light": "vscode-light",
+                "Dark": "vscode-dark"
+            }
         }
     ]
 }
