@@ -123,7 +123,7 @@ process {
                 try { $item.modes.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
-            'KDE QT' {
+            'KDE' {
                 if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
                     $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
 
