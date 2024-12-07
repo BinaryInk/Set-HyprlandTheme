@@ -90,6 +90,13 @@ $Clipse = @{
     Light = "$HOME/.config/clipse/themes/vscode_light.json"
     Dark = "$HOME/.config/clipse/themes/vscode_dark.json"
 }
+$Starship = @{
+    Type = 'Pattern'
+    Config = "$HOME/.config/starship/starship.toml"
+    Light = "vscode-light"
+    Dark = "vscode-dark"
+    Pattern = '(?<=palette\s*=\s*").*?(?=")'
+}
 
 # TODO Toggle if not provided
 if (!$Mode) {
@@ -127,7 +134,11 @@ $TaskwarriorContent = Get-Content $Taskwarrior["Config"]
 $TaskwarriorContent = $TaskwarriorContent -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"]
 $TaskwarriorContent | Set-Content $Taskwarrior["Config"]
 # Edit Clipse
-Copy-Item -Path $Clipse["$Mode"] -Destination $Clipse["Config"] -Force`
+Copy-Item -Path $Clipse["$Mode"] -Destination $Clipse["Config"] -Force
+# Edit Starship
+$StarshipContent = Get-Content $Starship["Config"]
+$StarshipContent = $StarshipContent -replace $Starship["Pattern"],$Starship["$Mode"]
+$StarshipContent | Set-Content $Starship['Config']
 
 # Edit Hyprland
 $Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
