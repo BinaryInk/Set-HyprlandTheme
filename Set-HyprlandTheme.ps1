@@ -87,13 +87,16 @@ process {
     foreach ($item in $Config) {
         if ($AppsNotFound -contains $item.appName) { continue }
 
-        try { 
-            Invoke-Expression -Command $item.preCommand 
-        }
-        catch {
-            Write-Error "Unable to execute preCommand ($($item.preCommand))"
-            Write-Warning "Skipping switching $($item.appName)!"
-            continue
+        if ($item.preCommand -ne "" -or
+        $null -ne $item.preCommand) {
+            try { 
+                Invoke-Expression -Command $item.preCommand 
+            }
+            catch {
+                Write-Error "Unable to execute preCommand ($($item.preCommand))"
+                Write-Warning "Skipping switching $($item.appName)!"
+                continue
+            }
         }
 
         switch ($item.type) {
@@ -142,14 +145,17 @@ process {
             }
         }
 
-        Write-Debug "Attempting to Run postCommand '$($item.postCommand)'..."
-        try { 
-            Invoke-Expression -Command $item.postCommand 
-        }
-        catch {
-            Write-Error "Unable to execute postCommand ($($item.postCommand))"
-            Write-Warning "Please check the state of $($item.appName) due to this failure."
-            continue
+        if ($item.postCommand -ne "" -or
+            $null -ne $item.postCommand) {
+            Write-Debug "Attempting to Run postCommand '$($item.postCommand)'..."
+            try { 
+                Invoke-Expression -Command $item.postCommand 
+            }
+            catch {
+                Write-Error "Unable to execute postCommand ($($item.postCommand))"
+                Write-Warning "Please check the state of $($item.appName) due to this failure."
+                continue
+            }
         }
     }
 }
