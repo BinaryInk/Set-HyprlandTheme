@@ -80,6 +80,7 @@ begin {
         Write-Debug "Checking config path for '$($item.appName)'..."
         if ($item.type -eq 'Cursor' -or $item.type -eq 'KDE QT') {
             Write-Debug "$($item.type) has no path to check."
+            continue
         }
         if (!$(Test-Path $item.path)) {
             Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
