@@ -103,12 +103,12 @@ foreach ($item in $Config) {
     switch ($item.type) {
         'FileContents' {
             try { $modeString | Out-File $path }
-            catch { Write-Warning "Unable to write to $path" }
+            catch { Write-Error "Unable to write to $path" }
         }
         'KDE' {
             if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
                 try { & plasma-apply-colorscheme $modeString }
-                catch { Write-Warning "plasma-apply-colorscheme failed to set $modeString" }
+                catch { Write-Error "plasma-apply-colorscheme failed to set $modeString" }
             }
             else {
                 Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
@@ -116,11 +116,11 @@ foreach ($item in $Config) {
         }
         'ReplaceFile' {
             if (!$(Test-Path $modeString)) {
-                Write-Warning "Config File Replacement: $modeString does not exist!"
+                Write-Error "Config File Replacement: $modeString does not exist!"
             }
             else {
                 try { Copy-Item -Path $modeString -Destination $path -Force }
-                catch { Write-Warning "Failed to overwrite $path" }
+                catch { Write-Error "Failed to overwrite $path" }
             }
         }
         'Cursor' {
@@ -129,7 +129,7 @@ foreach ($item in $Config) {
                     gsettings set org.gnome.desktop.interface cursor-theme $modeString
                 }
                 catch {
-                    Write-Warning "Failed to set cursor via gsettings"
+                    Write-Error "Failed to set cursor via gsettings"
                 }
             }
             # Handle KDE
@@ -141,7 +141,7 @@ foreach ($item in $Config) {
             # Handle pattern validit
         }
         Default {
-            Write-Warning "Unknown Config Type: $type"
+            Write-Error "Unknown Config Type: $type"
         }
     }
 }
