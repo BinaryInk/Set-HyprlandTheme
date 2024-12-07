@@ -2,7 +2,7 @@
     "applications": [
         {
             "appName": "Waybar",
-            "type": "FileContents",
+            "type": "Replace_FileContents",
             "path": "~/.config/waybar/style.css",
             "modes": {
                 "Light": "@import 'style-light.css';",
@@ -13,7 +13,7 @@
         },
         {
             "appName": "GTK3-css",
-            "type": "FileContents",
+            "type": "Replace_FileContents",
             "path": "~/.config/gtk-3.0/gtk.css",
             "modes": {
                 "Light": "@import 'colors-light.css';",
@@ -24,7 +24,7 @@
         },
         {
             "appName": "GTK3-ini",
-            "type": "ReplaceFile",
+            "type": "Replace_File",
             "path": "~/.config/gtk-3.0/settings.ini",
             "modes": {
                 "Light": "~/.config/gtk-3.0/settings-light.ini",
@@ -35,7 +35,7 @@
         },
         {
             "appName": "GTK",
-            "type": "GTK",
+            "type": "GTK_Theme",
             "modes": {
                 "Light": "Breeze",
                 "Dark": "Breeze-Dark"
@@ -44,8 +44,8 @@
             "postCommand": ""
         },
         {
-            "appName": "KDE QT",
-            "type": "KDE",
+            "appName": "KDE Color Scheme",
+            "type": "KDE_ColorScheme",
             "modes": {
                 "Light": "HyprlandLight",
                 "Dark": "BinaryInkBlack"
@@ -55,7 +55,7 @@
         },
         {
             "appName": "Kitty",
-            "type": "ReplaceFile",
+            "type": "Replace_File",
             "path": "~/.config/kitty/kitty.conf",
             "modes": {
                 "Light": "~/.config/kitty/kitty-light.conf",
@@ -66,7 +66,7 @@
         },
         {
             "appName": "PowerShell",
-            "type": "FileContents",
+            "type": "Replace_FileContents",
             "path": "~/.config/powershell/powershell.d/00-env-theme.ps1",
             "modes": {
                 "Light": "$env:PWSH_THEME_LIGHT = 1",
@@ -77,7 +77,7 @@
         },
         {
             "appName": "Hyprland Config",
-            "type": "FileContents",
+            "type": "Replace_FileContents",
             "path": "~/.config/hypr/hyprland.conf.d/theme-mode.conf",
             "modes": {
                 "Light": "$themeMode = light",
@@ -88,7 +88,7 @@
         },
         {
             "appName": "Rofi",
-            "type": "ReplaceFile",
+            "type": "Replace_File",
             "path": "~/.config/rofi/current.rasi",
             "modes": {
                 "Light": "~/.config/rofi/light.rasi",
@@ -99,7 +99,7 @@
         },
         {
             "appName": "Dunst",
-            "type": "ReplaceFile",
+            "type": "Replace_File",
             "path": "~/.config/dunst/dunstrc.d/98-theme.conf",
             "modes": {
                 "Light": "~/.config/dunst/themes/vscode-light.conf",
@@ -109,8 +109,8 @@
             "postCommand": ""
         },
         {
-            "appName": "Cursor",
-            "type": "Cursor",
+            "appName": "System Cursor",
+            "type": "Change_Cursor",
             "modes": {
                 "Light": "Bibata-Modern-Ice 24",
                 "Dark": "Bibata-Modern-Classic 24"
@@ -120,7 +120,7 @@
         },
         {
             "appName": "Taskwarrior",
-            "type": "PatternReplace",
+            "type": "Replace_Pattern",
             "path": "~/.config/task/theme",
             "pattern": "(?<=^|\\s)(\\w+-\\w+)\\.theme(?=\\s|$)",
             "modes": {
@@ -132,7 +132,7 @@
         },
         {
             "appName": "Clipse",
-            "type": "ReplaceFile",
+            "type": "Replace_File",
             "path": "~/.config/clipse/custom_theme.json",
             "modes": {
                 "Light": "~/.config/clipse/themes/vscode_light.json",
@@ -143,7 +143,7 @@
         },
         {
             "appName": "Starship",
-            "type": "PatternReplace",
+            "type": "Replace_Pattern",
             "path": "~/.config/starship/starship.toml",
             "pattern": "(?<=palette\\s*=\\s*\").*?(?=\")",
             "modes": {

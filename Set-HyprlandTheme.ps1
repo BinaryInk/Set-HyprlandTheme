@@ -82,9 +82,9 @@ begin {
     Write-Debug "Checking config entries..."
     foreach ($item in $Config.applications) {
         Write-Debug "Checking config path for '$($item.appName)'..."
-        if ($item.type -eq 'Cursor' -or 
-                $item.type -eq 'KDE' -or
-                $item.type -eq 'GTK') {
+        if ($item.type -eq 'Change_Cursor' -or 
+                $item.type -eq 'KDE_ColorScheme' -or
+                $item.type -eq 'GTK_Theme') {
             Write-Debug "Config type '$($item.type)' has no path to check."
             continue
         }
@@ -123,11 +123,11 @@ process {
 
         Write-Debug "$($item.appName) type: $($item.type)"
         switch ($item.type) {
-            'FileContents' {
+            'Replace_FileContents' {
                 try { $item.modes.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
-            'KDE' {
+            'KDE_ColorScheme' {
                 if (!$OptionalCliUtilities['plasma-apply-colorscheme']) {
                     $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
 
@@ -150,7 +150,7 @@ process {
                     Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
                 }
             }
-            'GTK' {
+            'GTK_Theme' {
                 if (!$OptionalCliUtilities['gsettings']) {
                     $cmd = "gsettings set org.gnome.desktop.interface gtk-theme '$($item.modes.$Mode)'"
 
@@ -173,7 +173,7 @@ process {
                     Write-Error 'GTK: Unable to set GTK theme via gsettings!'
                 }
             }
-            'ReplaceFile' {
+            'Replace_File' {
                 if (!$(Test-Path $item.modes.$Mode)) {
                     Write-Error "Config File Replacement: $($item.modes.$Mode) does not exist!"
                 }
@@ -190,7 +190,7 @@ process {
                     }
                 }
             }
-            'Cursor' {
+            'Change_Cursor' {
                 if (!$OptionalCliUtilities['gsettings']) {
                     $gsettingsMode = $($item.modes.$Mode).Split(' ')[0]
                     $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $gsettingsMode"
@@ -226,7 +226,7 @@ process {
                     }
                 }
             }
-            'PatternReplace' {
+            'Replace_Pattern' {
                 Write-Verbose "Replacing contents of '$($item.path)' with '$($item.modes.$Mode)' using regex pattern of '$($item.pattern)'."
                 $FileContent = Get-Content $item.path
                 $FileContent = $FileContent -replace $item.pattern,$item.modes.$Mode
