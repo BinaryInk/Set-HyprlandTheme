@@ -120,12 +120,12 @@ process {
 
         switch ($item.type) {
             'FileContents' {
-                try { $item.mode.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
+                try { $item.modes.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
             'KDE QT' {
                 if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
-                    $cmd = "plasma-apply-colorscheme $($item.mode.$Mode)"
+                    $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
 
                     if ($WhatIfPreference -eq $true) {
                         Write-Host "What if: Invoking expression: $cmd"
@@ -135,7 +135,7 @@ process {
                             Invoke-Expression $cmd 
                         }
                         catch { 
-                            Write-Error "plasma-apply-colorscheme failed to set $($item.mode.$Mode)" 
+                            Write-Error "plasma-apply-colorscheme failed to set $($item.modes.$Mode)" 
                         }
                     }
                 }
@@ -144,12 +144,12 @@ process {
                 }
             }
             'ReplaceFile' {
-                if (!$(Test-Path $item.mode.$Mode)) {
-                    Write-Error "Config File Replacement: $($item.mode.$Mode) does not exist!"
+                if (!$(Test-Path $item.modes.$Mode)) {
+                    Write-Error "Config File Replacement: $($item.modes.$Mode) does not exist!"
                 }
                 else {
                     try { 
-                        Copy-Item -Path $item.mode.$Mode `
+                        Copy-Item -Path $item.modes.$Mode `
                                   -Destination $item.path `
                                   -WhatIf:$WhatIfPreference `
                                   -Force
@@ -159,7 +159,7 @@ process {
             }
             'Cursor' {
                 if ($OptionalCliUtilities['gsettings']) {
-                    $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $($item.mode.$Mode)"
+                    $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $($item.modes.$Mode)"
                     if ($WhatIfPreference -eq $true) {
                         Write-Host "What if: Invoking expression: $cmd)"
                     }
@@ -177,13 +177,13 @@ process {
                     Write-Host "What if: Invoking expression: $cmd"
                 }
                 else {
-                    try { hyprctl setcursor $item.mode.$Mode}
+                    try { hyprctl setcursor $item.modes.$Mode}
                     catch { Write-Error "Failed to set cursor via hyprctl!"}
                 }
             }
             'PatternReplace' {
                 $FileContent = Get-Content $item.path
-                $FileContent = $FileContent -replace $item.pattern,$item.mode.$Mode
+                $FileContent = $FileContent -replace $item.pattern,$item.modes.$Mode
                 $FileContent | Set-Content $item.path -WhatIf:$WhatIfPreference
             }
             Default {
