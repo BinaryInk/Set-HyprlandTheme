@@ -82,7 +82,9 @@ begin {
     Write-Debug "Checking config entries..."
     foreach ($item in $Config.applications) {
         Write-Debug "Checking config path for '$($item.appName)'..."
-        if ($item.type -eq 'Cursor' -or $item.type -eq 'KDE') {
+        if ($item.type -eq 'Cursor' -or 
+                $item.type -eq 'KDE' -or
+                $item.type -eq 'GTK') {
             Write-Debug "Config type '$($item.type)' has no path to check."
             continue
         }
@@ -99,25 +101,27 @@ process {
 
         if ($AppsNotFound -contains $item.appName) { continue }
 
-        Write-Debug "Checking for preCommand..."
+        Write-Debug "Checking for user-provided preCommand..."
         if ($item.preCommand -ne "" -and
             $null -ne $item.preCommand) {
-            Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
+            Write-Verbose "Invoking user-provided preCommand '$($item.preCommand)'..."
             if ($WhatIfPreference -eq $true) {
                 Write-Host "What if: Invoking expression: $($item.preCommand)"
             }
             else {
                 try {
-                    Invoke-Expression -Command $item.preCommand
+                    $output = Invoke-Expression -Command $item.preCommand
                 }
                 catch {
-                    Write-Error "Unable to execute preCommand ($($item.preCommand))"
-                    Write-Warning "Skipping switching $($item.appName)!"
+                    Write-Error "Unable to execute user-provided preCommand '$($item.preCommand)'."
+                    Write-Host "preCommand Output: $output"
+                    Write-Warning "Skipping $($item.appName)!"
                     continue
                 }
             }
         }
 
+        Write-Debug "$($item.appName) type: $($item.type)"
         switch ($item.type) {
             'FileContents' {
                 try { $item.modes.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
@@ -128,7 +132,7 @@ process {
                     $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
 
                     if ($WhatIfPreference -eq $true) {
-                        Write-Host "What if: Invoking expression: $cmd"
+                        Write-Host "What if: Invoking expression: '$cmd'."
                     }
                     else {
                         try {
@@ -146,18 +150,44 @@ process {
                     Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
                 }
             }
+            'GTK' {
+                if (!$OptionalCliUtilities['gsettings']) {
+                    $cmd = "gsettings set org.gnome.desktop.interface gtk-theme '$($item.modes.$Mode)'"
+
+                    if ($WhatIfPreference -eq $true) {
+                        Write-Host "What if: Invoking expression: '$cmd'"
+                    }
+                    else {
+                        try {
+                            Write-Debug "Invoking expression: '$cmd'"
+                            $output = Invoke-Expression $cmd
+                            if ($LASTEXITCODE -ne 0) { throw }
+                            if ($output) { Write-Host "gsettings: $output" }
+                        }
+                        catch {
+                            Write-Error "gsettings failed to set GTK theme of '$($item.modes.$Mode)'"
+                        }
+                    }
+                }
+                else {
+                    Write-Error 'GTK: Unable to set GTK theme via gsettings!'
+                }
+            }
             'ReplaceFile' {
                 if (!$(Test-Path $item.modes.$Mode)) {
                     Write-Error "Config File Replacement: $($item.modes.$Mode) does not exist!"
                 }
                 else {
-                    try { 
+                    try {
+                        Write-Verbose "Copying item '$($item.modes.$Mode)' to '$($item.path)' forcibly."
                         Copy-Item -Path $item.modes.$Mode `
                                   -Destination $item.path `
-                                  -WhatIf:$WhatIfPreference `
-                                  -Force
+                                  -Force `
+                                  -WhatIf:$WhatIfPreference
                     }
-                    catch { Write-Error "Failed to overwrite $($item.path)" }
+                    catch { 
+                        Write-Error "Failed to overwrite $($item.path)"
+                    }
                 }
             }
             'Cursor' {
@@ -165,11 +195,11 @@ process {
                     $gsettingsMode = $($item.modes.$Mode).Split(' ')[0]
                     $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $gsettingsMode"
                     if ($WhatIfPreference -eq $true) {
-                        Write-Host "What if: Invoking expression: $cmd)"
+                        Write-Host "What if: Invoking expression: '$cmd'.)"
                     }
                     else {
                         try {
-                            Write-Debug "Invoking expression: '$cmd'."
+                            Write-Verbose "Invoking expression: '$cmd'."
                             $output = Invoke-Expression $cmd
                             if ($LASTEXITCODE -ne 0) { throw }
                             Write-Host "gsettings: $output"
@@ -181,12 +211,12 @@ process {
                 }
                 # TODO Handle KDE
                 if ($WhatIfPreference -eq $true) {
-                    Write-Host "What if: Invoking expression: $cmd"
+                    Write-Host "What if: Invoking expression: '$cmd'."
                 }
                 else {
                     $cmd = "hyprctl setcursor $($item.modes.$Mode)"
                     try { 
-                        Write-Debug "Invoking expression: $cmd"
+                        Write-Verbose "Invoking expression: '$cmd'."
                         $output = Invoke-Expression $cmd
                         if ($LASTEXITCODE -ne 0) { throw }
                         Write-Host "hyprctl: $output"
@@ -197,27 +227,29 @@ process {
                 }
             }
             'PatternReplace' {
+                Write-Verbose "Replacing contents of '$($item.path)' with '$($item.modes.$Mode)' using regex pattern of '$($item.pattern)'."
                 $FileContent = Get-Content $item.path
                 $FileContent = $FileContent -replace $item.pattern,$item.modes.$Mode
                 $FileContent | Set-Content $item.path -WhatIf:$WhatIfPreference
             }
             Default {
-                Write-Error "Unknown Config Type: $($item.type)"
+                Write-Error "Unknown Config Type: '$($item.type)'."
             }
         }
 
         if ($item.postCommand -ne "" -and
             $null -ne $item.postCommand) {
-            Write-Debug "Attempting to Run postCommand '$($item.postCommand)'..."
             if ($WhatIfPreference -eq $true) {
-                Write-Host "What if: Invoking expression: $($item.preCommand)"
+                Write-Host "What if: Invoking expression: '$($item.preCommand)'."
             }
             else {
-                try { 
-                    Invoke-Expression -Command $item.postCommand 
+                try {
+                    Write-Verbose "Invoking user-provided postCommand '$($item.postCommand)'."
+                    $output = Invoke-Expression -Command $item.postCommand 
                 }
                 catch {
-                    Write-Error "Unable to execute postCommand ($($item.postCommand))"
+                    Write-Error "Unable to execute user-provided postCommand '$($item.postCommand)'."
+                    Write-Host "postCommand output: $output"
                     Write-Warning "Please check the state of $($item.appName) due to this failure."
                     continue
                 }

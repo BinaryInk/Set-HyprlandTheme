@@ -16,8 +16,8 @@
             "type": "FileContents",
             "path": "~/.config/gtk-3.0/gtk.css",
             "modes": {
-                "Light": "@import '~/.config/gtk-3.0/colors-dark.css'",
-                "Dark": "@import '~/.config/gtk-3.0/colors-light.css'"
+                "Light": "@import 'colors-light.css'",
+                "Dark": "@import 'colors-dark.css'"
             },
             "preCommand": "",
             "postCommand": ""
@@ -29,6 +29,16 @@
             "modes": {
                 "Light": "~/.config/gtk-3.0/settings-light.ini",
                 "Dark": "~/.config/gtk-3.0/settings-dark.ini"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "GTK",
+            "type": "GTK",
+            "modes": {
+                "Light": "Breeze",
+                "Dark": "Breeze-Dark"
             },
             "preCommand": "",
             "postCommand": ""
@@ -66,7 +76,7 @@
             "postCommand": ""
         },
         {
-            "appName": "Hyprland",
+            "appName": "Hyprland Config",
             "type": "FileContents",
             "path": "~/.config/hypr/hyprland.conf.d/theme-mode.conf",
             "modes": {
@@ -74,7 +84,7 @@
                 "Dark": "$themeMode = dark"
             },
             "preCommand": "",
-            "postCommand": ""
+            "postCommand": "hyprctl reload"
         },
         {
             "appName": "Rofi",
