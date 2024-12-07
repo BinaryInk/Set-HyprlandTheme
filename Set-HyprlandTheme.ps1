@@ -35,8 +35,7 @@ begin {
     $AppsNotFound = [List[string]]::new()
 
     foreach ($cmd in $OptionalCliUtilityList) {
-        [bool]$found = which $cmd ? $true : $false
-        if ($found) {
+        if (which $cmd) {
             Write-Debug "Optional CLI Utility '$cmd' found."
         }
         else {
