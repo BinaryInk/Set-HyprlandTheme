@@ -95,7 +95,7 @@ begin {
 
 process {
     foreach ($item in $Config.applications) {
-        Write-Host "Switching $($item.appName) to $Mode Mode..."
+        Write-Host "Switching '$($item.appName)' to '$Mode' Mode..."
 
         if ($AppsNotFound -contains $item.appName) { continue }
 
@@ -124,15 +124,18 @@ process {
                 catch { Write-Error "Unable to write to $($item.path)" }
             }
             'KDE' {
-                if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
+                if (!$OptionalCliUtilities['plasma-apply-colorscheme']) {
                     $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
 
                     if ($WhatIfPreference -eq $true) {
                         Write-Host "What if: Invoking expression: $cmd"
                     }
                     else {
-                        try { 
-                            Invoke-Expression $cmd 
+                        try {
+                            Write-Debug "Invoking expression: '$cmd'."
+                            $output = Invoke-Expression $cmd
+                            if ($LASTEXITCODE -ne 0) { throw }
+                            Write-Host "plasma-apply-colorscheme: $output" 
                         }
                         catch { 
                             Write-Error "plasma-apply-colorscheme failed to set $($item.modes.$Mode)" 
@@ -140,7 +143,7 @@ process {
                     }
                 }
                 else {
-                    Write-Error 'KDE QT: Unable to set color scheme via plasma-apply-colorscheme!'
+                    Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
                 }
             }
             'ReplaceFile' {
@@ -158,27 +161,39 @@ process {
                 }
             }
             'Cursor' {
-                if ($OptionalCliUtilities['gsettings']) {
-                    $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $($item.modes.$Mode)"
+                if (!$OptionalCliUtilities['gsettings']) {
+                    $gsettingsMode = $($item.modes.$Mode).Split(' ')[0]
+                    $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $gsettingsMode"
                     if ($WhatIfPreference -eq $true) {
                         Write-Host "What if: Invoking expression: $cmd)"
                     }
                     else {
                         try {
-                            Invoke-Expression $cmd
+                            Write-Debug "Invoking expression: '$cmd'."
+                            $output = Invoke-Expression $cmd
+                            if ($LASTEXITCODE -ne 0) { throw }
+                            Write-Host "gsettings: $output"
                         }
                         catch {
                             Write-Error "Failed to set cursor via gsettings"
                         }
                     }
                 }
-                # Handle KDE
+                # TODO Handle KDE
                 if ($WhatIfPreference -eq $true) {
                     Write-Host "What if: Invoking expression: $cmd"
                 }
                 else {
-                    try { hyprctl setcursor $item.modes.$Mode}
-                    catch { Write-Error "Failed to set cursor via hyprctl!"}
+                    $cmd = "hyprctl setcursor $($item.modes.$Mode)"
+                    try { 
+                        Write-Debug "Invoking expression: $cmd"
+                        $output = Invoke-Expression $cmd
+                        if ($LASTEXITCODE -ne 0) { throw }
+                        Write-Host "hyprctl: $output"
+                    }
+                    catch { 
+                        Write-Error "Failed to set cursor via hyprctl!"
+                    }
                 }
             }
             'PatternReplace' {
