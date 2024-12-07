@@ -81,10 +81,22 @@ begin {
 }
 
 process {
-    Write-Host "Switching to ${Mode} Mode..."
+    Write-Host "Switching $($item.appName) to $($item.mode) Mode..."
+
+    Write-Debug "Attempting to Run preCommand '$($item.preCommand)'..."
+
     foreach ($item in $Config) {
         if ($AppsNotFound -contains $item.appName) { continue }
-        
+
+        try { 
+            Invoke-Expression -Command $item.preCommand 
+        }
+        catch {
+            Write-Error "Unable to execute preCommand ($($item.preCommand))"
+            Write-Warning "Skipping switching $($item.appName)!"
+            continue
+        }
+
         switch ($item.type) {
             'FileContents' {
                 try { $modeString | Out-File $item.path }
@@ -129,9 +141,18 @@ process {
                 Write-Error "Unknown Config Type: $($item.type)"
             }
         }
+
+        Write-Debug "Attempting to Run postCommand '$($item.postCommand)'..."
+        try { 
+            Invoke-Expression -Command $item.postCommand 
+        }
+        catch {
+            Write-Error "Unable to execute postCommand ($($item.postCommand))"
+            Write-Warning "Please check the state of $($item.appName) due to this failure."
+            continue
+        }
     }
 }
-
 
 end {}
 
