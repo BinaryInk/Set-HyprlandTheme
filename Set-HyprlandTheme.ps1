@@ -5,84 +5,40 @@ param(
     [Parameter(Mandatory = $false, Position = 0)]
     [string]
     [ValidateSet('Light','Dark')]
-    $Mode
+    $Mode,
+
+    # Config file path
+    [Parameter(Mandatory = $false, Position = 1)]
+    [string]
+    $ConfigPath
 )
 
-### Settings
+New-Variable -Name 'DefaultConfigPaths' `
+             -Option 'Constant' `
+             -Value @(
+                "$PSScriptRoot/config.json",
+                "$HOME/.config/Set-HyprlandTheme/config.json",
+                "$HOME/.config/hypr/Set-HyprlandTheme/config.json",
+                "$HOME/.config/hypr/Set-HyprlandTheme.json"
+             )
+New-Variable -Name 'OptionalCliUtilityList' `
+             -Option 'Constant' `
+             -Value @(
+                'gsettings',
+                'plasma-apply-colorscheme'
+             )
+[psobject]$Config
+[System.Collections.Generic.Dictionary[string,bool]]$OptionalCliUtilities = @{}
 
-$Hostname = Get-Content '/etc/hostname'
-
-$Waybar = @{
-    Type = 'Replace';
-    Config = '~/.config/waybar/style.css';
-    Light = 'style-light.css';
-    Dark = 'style-dark.css';
-}
-$GtkCss = @{
-    Type = 'Edit';
-    Config = '~/.config/gtk-3.0/gtk.css';
-    Light = 'colors-light.css';
-    Dark = 'colors-dark.css';
-}
-$GtkIni = @{
-    Type = 'Replace';
-    Config = '~/.config/gtk-3.0/settings.ini'
-    Light = '~/.config/gtk-3.0/settings-light.ini'
-    Dark = '~/.config/gtk-3.0/settings-dark.ini'
-}
-$Qt = @{
-    Type = '';
-    Config = '';
-    Light = 'HyprlandLight';
-    Dark = 'BinaryInkBlack';
-}
-$Kitty = @{
-    Type = 'Replace';
-    Config = '~/.config/kitty/kitty.conf';
-    Light = '~/.config/kitty/kitty-light.conf';
-    Dark = '~/.config/kitty/kitty-dark.conf';
-}
-$Pwsh = @{
-    Type = 'Edit';
-    Config = '~/.config/powershell/powershell.d/00-env-theme.ps1';
-    Light = '$env:PWSH_THEME_LIGHT = 1';
-    Dark = '$env:PWSH_THEME_LIGHT = 0';
-}
-$Hyprland = @{
-    Type = 'Edit';
-    Config = '~/.config/hypr/hyprland.conf.d/theme-mode.conf';
-    Light = '$themeMode=light';
-    Dark = '$themeMode=dark';
-}
-$SuperProductivity = @{
-    Type = 'Replace';
-    Config = '~/.config/superProductivity/styles.css';
-    Light = '~/.config/superProductivity/styles-light.css';
-    Dark = '~/.config/superProductivity/styles-dark.css';
-}
-$Rofi = @{
-    Type = 'Replace';
-    Config = '~/.config/rofi/current.rasi';
-    Light = '~/.config/rofi/light.rasi';
-    Dark = '~/.config/rofi/dark.rasi';
-}
-$Dunst = @{
-    Type = 'Replace';
-    Config = '~/.config/dunst/dunstrc.d/98-theme.conf';
-    Light = "~/.config/dunst/themes/vscode-light.conf"
-    Dark = "~/.config/dunst/themes/vscode-dark.conf"
-}
-$Cursor = @{
-    Type = 'Set'
-    Light = 'Bibata-Modern-Ice'
-    Dark = 'Bibata-Modern-Classic'
-}
-$Taskwarrior = @{
-    Type = 'Edit'
-    Config = "$HOME/.config/task/theme"
-    Light = 'light-256.theme'
-    Dark = 'dark-256.theme'
-    Pattern = '(?<=^|\s)(\w+-\w+)\.theme(?=\s|$)'
+foreach ($cmd in $OptionalCliUtilityList) {
+    [bool]$found = which $cmd ? $true : $false
+    if ($found) {
+        Write-Debug "Optional CLI Utility '$cmd' found."
+    }
+    else {
+        Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+    }
+    $OptionalCliUtilities.Add($cmd, $found)
 }
 $Clipse = @{
     Type = 'Replace'
@@ -91,12 +47,103 @@ $Clipse = @{
     Dark = "$HOME/.config/clipse/themes/vscode_dark.json"
 }
 
-# TODO Toggle if not provided
-if (!$Mode) {
+# Check for config file
+if (!$ConfigPath) {
+    # Check default locations for config file
+    foreach ($path in $DefaultConfigPaths) {
+        if (Test-Path $path) {
+            Write-Debug "Found config file: '$path'"
+            $ConfigPath = $path
+        }
+    }
+}
+else {
+    if (!$(Test-Path $ConfigPath)) {
+        throw "Config not found: '${Config}'"
+    }
+    elseif (!$([System.IO.Path]::GetExtension()) -ne '.json') {
+        throw "Config not a json file"
+    }
+}
 
+# Load config
+try {
+    $Config = Get-Content $ConfigPath | ConvertFrom-Json
+}
+catch {
+    throw 'Cannot load config JSON.'
 }
 
 ### Process
+Write-Host "Switching to ${Mode} Mode..."
+foreach ($item in $Config) {
+    $appName = $item.appName
+    Write-Host "Switching $appName..."
+
+    $type = $item.type
+    Write-Verbose "Config Type: $type"
+    
+    $path = $item.path
+    Write-Verbose "Config File: $path"
+    
+    $pathFound = Test-Path $pathFound
+    if (!$pathFound) {
+        Write-Warning "Config file: $path does not exist!" 
+    }
+    else {
+        Write-Verbose 'Config file exists.'
+    }
+    $modeString = $item.modes.$Mode
+    Write-Verbose "Config Mode String; $modeString"
+    if ($item.pattern) {
+        $pattern = $item.pattern
+        Write-Verbose "Config Pattern: $pattern"
+    }
+    switch ($item.type) {
+        'FileContents' {
+            try { $modeString | Out-File $path }
+            catch { Write-Warning "Unable to write to $path" }
+        }
+        'KDE' {
+            if ($OptionalCliUtilities['plasma-apply-colorscheme']) {
+                try { & plasma-apply-colorscheme $modeString }
+                catch { Write-Warning "plasma-apply-colorscheme failed to set $modeString" }
+            }
+            else {
+                Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
+            }
+        }
+        'ReplaceFile' {
+            if (!$(Test-Path $modeString)) {
+                Write-Warning "Config File Replacement: $modeString does not exist!"
+            }
+            else {
+                try { Copy-Item -Path $modeString -Destination $path -Force }
+                catch { Write-Warning "Failed to overwrite $path" }
+            }
+        }
+        'Cursor' {
+            if ($OptionalCliUtilities['gsettings']) {
+                try {
+                    gsettings set org.gnome.desktop.interface cursor-theme $modeString
+                }
+                catch {
+                    Write-Warning "Failed to set cursor via gsettings"
+                }
+            }
+            # Handle KDE
+            try { hyprctl setcursor $modeString}
+            catch { Write-Error "Failed to set cursor via hyprctl!"}
+        }
+        'PatternReplace' {
+            # Handle file existence
+            # Handle pattern validit
+        }
+        Default {
+            Write-Warning "Unknown Config Type: $type"
+        }
+    }
+}
 
 # Edit Waybar
 "@import '$($Waybar["$Mode"])';" | Out-File $Waybar['Config'] -Force

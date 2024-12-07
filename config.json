@@ -1,0 +1,102 @@
+{
+    "applications": [
+        {
+            "appName": "Waybar",
+            "type": "FileContents",
+            "path": "~/.config/waybar/style.css",
+            "modes": {
+                "Light": "@import '~/.config/waybar/style-light.css';",
+                "Dark": "@import '~/.config/waybar/style-dark.css';"
+            }
+        },
+        {
+            "appName": "GTK3-css",
+            "type": "FileContents",
+            "path": "~/.config/gtk-3.0/gtk.css",
+            "modes": {
+                "Light": "@import '~/.config/gtk-3.0/colors-dark.css'",
+                "Dark": "@import '~/.config/gtk-3.0/colors-light.css'"
+            }
+        },
+        {
+            "appName": "GTK3-ini",
+            "type": "ReplaceFile",
+            "path": "~/.config/gtk-3.0/settings.ini",
+            "modes": {
+                "Light": "~/.config/gtk-3.0/settings-light.ini",
+                "Dark": "~/.config/gtk-3.0/settings-dark.ini"
+            }
+        },
+        {
+            "appName": "KDE QT",
+            "type": "KDE",
+            "modes": {
+                "Light": "HyprlandLight",
+                "Dark": "BinaryInkBlack"
+            }
+        },
+        {
+            "appName": "Kitty",
+            "type": "ReplaceFile",
+            "path": "~/.config/kitty/kitty.conf",
+            "modes": {
+                "Light": "~/.config/kitty/kitty-light.conf",
+                "Dark": "~/.config/kitty/kitty-dark.conf"
+            }
+        },
+        {
+            "appName": "PowerShell",
+            "type": "FileContents",
+            "path": "~/.config/powershell/powershell.d/00-env-theme.ps1",
+            "modes": {
+                "Light": "$env:PWSH_THEME_LIGHT = 1",
+                "Dark": "$env:PWSH_THEME_LIGHT = 0"
+            }
+        },
+        {
+            "appName": "Hyprland",
+            "type": "FileContents",
+            "path": "~/.config/hypr/hyprland.conf.d/theme-mode.conf",
+            "modes": {
+                "Light": "$themeMode = light",
+                "Dark": "$themeMode = dark"
+            }
+        },
+        {
+            "appName": "Rofi",
+            "type": "ReplaceFile",
+            "path": "~/.config/rofi/current.rasi",
+            "modes": {
+                "Light": "~/.config/rofi/light.rasi",
+                "Dark": "~/.config/rofi/dark.rasi"
+            }
+        },
+        {
+            "appName": "Dunst",
+            "mode": "ReplaceFile",
+            "path": "~/.config/dunst/dunstrc.d/98-theme.conf",
+            "modes": {
+                "Light": "~/.config/dunst/themes/vscode-light.conf",
+                "Dark": "~/.config/dunst/themes/vscode-dark.conf"
+            }
+        },
+        {
+            "appName": "Cursor",
+            "type": "Cursor",
+            "mode": {
+                "Light": "Bibata-Modern-Ice 24",
+                "Dark": "Bibata-Modern-Classic 24"
+            }
+        },
+        {
+            "appName": "Taskwarrior",
+            "type": "PatternReplace",
+            "path": "~/.config/task/theme",
+            "pattern": "(?<=^|\\s)(\\w+-\\w+)\\.theme(?=\\s|$)",
+            "mode": {
+                "Light": "light-256.theme",
+                "Dark": "dark-256.theme"
+            }
+        }
+    ]
+}
