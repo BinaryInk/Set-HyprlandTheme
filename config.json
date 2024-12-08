@@ -106,7 +106,7 @@
                 "Dark": "~/.config/dunst/themes/vscode-dark.conf"
             },
             "preCommand": "",
-            "postCommand": ""
+            "postCommand": "killall dunst && systemctl restart dunst --user"
         },
         {
             "appName": "System Cursor",
