@@ -1,145 +1,261 @@
 #!/usr/bin/env -S pwsh -NoProfile
 
+using namespace System.Collections.Generic
+
+[CmdletBinding(
+    SupportsShouldProcess = $true
+)]
+
 param(
     # Theme mode to apply
     [Parameter(Mandatory = $false, Position = 0)]
     [string]
     [ValidateSet('Light','Dark')]
-    $Mode
+    $Mode,
+
+    # Config file path
+    [Parameter(Mandatory = $false, Position = 1)]
+    [string]
+    $ConfigPath
 )
 
-### Settings
+begin {
+    New-Variable -Name 'DefaultConfigPaths' `
+                 -Option 'Constant' `
+                 -Value @(
+                    "$PSScriptRoot/config.json",
+                    "$HOME/.config/Set-HyprlandTheme/config.json",
+                    "$HOME/.config/hypr/Set-HyprlandTheme/config.json",
+                    "$HOME/.config/hypr/Set-HyprlandTheme.json"
+                 )
+    New-Variable -Name 'OptionalCliUtilityList' `
+                 -Option 'Constant' `
+                 -Value @(
+                    'gsettings',
+                    'plasma-apply-colorscheme'
+                 )
+    [psobject]$Config
+    $OptionalCliUtilities = [Dictionary[string,bool]]::new()
+    $AppsNotFound = [List[string]]::new()
 
-$Hostname = Get-Content '/etc/hostname'
+    foreach ($cmd in $OptionalCliUtilityList) {
+        if (which $cmd) {
+            Write-Debug "Optional CLI Utility '$cmd' found."
+        }
+        else {
+            Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+        }
+        $OptionalCliUtilities.Add($cmd, $found)
+    }
 
-$Waybar = @{
-    Type = 'Replace';
-    Config = '~/.config/waybar/style.css';
-    Light = 'style-light.css';
-    Dark = 'style-dark.css';
-}
-$GtkCss = @{
-    Type = 'Edit';
-    Config = '~/.config/gtk-3.0/gtk.css';
-    Light = 'colors-light.css';
-    Dark = 'colors-dark.css';
-}
-$GtkIni = @{
-    Type = 'Replace';
-    Config = '~/.config/gtk-3.0/settings.ini'
-    Light = '~/.config/gtk-3.0/settings-light.ini'
-    Dark = '~/.config/gtk-3.0/settings-dark.ini'
-}
-$Qt = @{
-    Type = '';
-    Config = '';
-    Light = 'HyprlandLight';
-    Dark = 'BinaryInkBlack';
-}
-$Kitty = @{
-    Type = 'Replace';
-    Config = '~/.config/kitty/kitty.conf';
-    Light = '~/.config/kitty/kitty-light.conf';
-    Dark = '~/.config/kitty/kitty-dark.conf';
-}
-$Pwsh = @{
-    Type = 'Edit';
-    Config = '~/.config/powershell/powershell.d/00-env-theme.ps1';
-    Light = '$env:PWSH_THEME_LIGHT = 1';
-    Dark = '$env:PWSH_THEME_LIGHT = 0';
-}
-$Hyprland = @{
-    Type = 'Edit';
-    Config = '~/.config/hypr/hyprland.conf.d/theme-mode.conf';
-    Light = '$themeMode=light';
-    Dark = '$themeMode=dark';
-}
-$SuperProductivity = @{
-    Type = 'Replace';
-    Config = '~/.config/superProductivity/styles.css';
-    Light = '~/.config/superProductivity/styles-light.css';
-    Dark = '~/.config/superProductivity/styles-dark.css';
-}
-$Rofi = @{
-    Type = 'Replace';
-    Config = '~/.config/rofi/current.rasi';
-    Light = '~/.config/rofi/light.rasi';
-    Dark = '~/.config/rofi/dark.rasi';
-}
-$Dunst = @{
-    Type = 'Replace';
-    Config = '~/.config/dunst/dunstrc.d/98-theme.conf';
-    Light = "~/.config/dunst/themes/vscode-light.conf"
-    Dark = "~/.config/dunst/themes/vscode-dark.conf"
-}
-$Cursor = @{
-    Type = 'Set'
-    Light = 'Bibata-Modern-Ice'
-    Dark = 'Bibata-Modern-Classic'
-}
-$Taskwarrior = @{
-    Type = 'Edit'
-    Config = "$HOME/.config/task/theme"
-    Light = 'light-256.theme'
-    Dark = 'dark-256.theme'
-    Pattern = '(?<=^|\s)(\w+-\w+)\.theme(?=\s|$)'
-}
-$Clipse = @{
-    Type = 'Replace'
-    Config = "$HOME/.config/clipse/custom_theme.json"
-    Light = "$HOME/.config/clipse/themes/vscode_light.json"
-    Dark = "$HOME/.config/clipse/themes/vscode_dark.json"
-}
-$Starship = @{
-    Type = 'Pattern'
-    Config = "$HOME/.config/starship/starship.toml"
-    Light = "vscode-light"
-    Dark = "vscode-dark"
-    Pattern = '(?<=palette\s*=\s*").*?(?=")'
+    Write-Debug "Checking for config file..."
+    if (!$ConfigPath) {
+        Write-Debug "Config file path not provided. Checking default locations..."
+        foreach ($path in $DefaultConfigPaths) {
+            if (Test-Path $path) {
+                Write-Debug "Found config file: '$path'"
+                $ConfigPath = $path
+            }
+        }
+    }
+    else {
+        Write-Debug "Config file path provided. Checking for existence and validity..."
+        if (!$(Test-Path $ConfigPath)) {
+            throw "Config not found: '${Config}'"
+        }
+        else {
+            [string]$ConfigExtension = Get-ChildItem -Path $ConfigPath | 
+                Select-Object -ExpandProperty 'Extension'
+        }
+
+        if ($ConfigExtension -ne '.json' -and
+            $ConfigExtension -ne '.jsonc') {
+            throw "Config file extension indicates the provided config file is not a json file."
+        }
+        Remove-Variable -Name 'ConfigExtension' 
+    }
+
+    Write-Debug "Loading config file ($ConfigPath)..."
+    try { $Config = Get-Content $ConfigPath | ConvertFrom-Json }
+    catch { throw 'Cannot load config JSON.' }
+
+    Write-Debug "Checking config entries..."
+    foreach ($item in $Config.applications) {
+        Write-Debug "Checking config path for '$($item.appName)'..."
+        if ($item.type -eq 'Change_Cursor' -or 
+                $item.type -eq 'KDE_ColorScheme' -or
+                $item.type -eq 'GTK_Theme') {
+            Write-Debug "Config type '$($item.type)' has no path to check."
+            continue
+        }
+        if (!$(Test-Path $item.path)) {
+            Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
+            $AppsNotFound.Add($item.appName)
+        }
+    }
 }
 
-# TODO Toggle if not provided
-if (!$Mode) {
+process {
+    foreach ($item in $Config.applications) {
+        Write-Host "Switching '$($item.appName)' to '$Mode' Mode..."
 
+        if ($AppsNotFound -contains $item.appName) { continue }
+
+        Write-Debug "Checking for user-provided preCommand..."
+        if ($item.preCommand -ne "" -and
+            $null -ne $item.preCommand) {
+            Write-Verbose "Invoking user-provided preCommand '$($item.preCommand)'..."
+            if ($WhatIfPreference -eq $true) {
+                Write-Host "What if: Invoking expression: $($item.preCommand)"
+            }
+            else {
+                try {
+                    $output = Invoke-Expression -Command $item.preCommand
+                }
+                catch {
+                    Write-Error "Unable to execute user-provided preCommand '$($item.preCommand)'."
+                    Write-Host "preCommand Output: $output"
+                    Write-Warning "Skipping $($item.appName)!"
+                    continue
+                }
+            }
+        }
+
+        Write-Debug "$($item.appName) type: $($item.type)"
+        switch ($item.type) {
+            'Replace_FileContents' {
+                try { $item.modes.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
+                catch { Write-Error "Unable to write to $($item.path)" }
+            }
+            'KDE_ColorScheme' {
+                if (!$OptionalCliUtilities['plasma-apply-colorscheme']) {
+                    $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
+
+                    if ($WhatIfPreference -eq $true) {
+                        Write-Host "What if: Invoking expression: '$cmd'."
+                    }
+                    else {
+                        try {
+                            Write-Debug "Invoking expression: '$cmd'."
+                            $output = Invoke-Expression $cmd
+                            if ($LASTEXITCODE -ne 0) { throw }
+                            Write-Host "plasma-apply-colorscheme: $output" 
+                        }
+                        catch { 
+                            Write-Error "plasma-apply-colorscheme failed to set $($item.modes.$Mode)" 
+                        }
+                    }
+                }
+                else {
+                    Write-Error 'KDE: Unable to set color scheme via plasma-apply-colorscheme!'
+                }
+            }
+            'GTK_Theme' {
+                if (!$OptionalCliUtilities['gsettings']) {
+                    $cmd = "gsettings set org.gnome.desktop.interface gtk-theme '$($item.modes.$Mode)'"
+
+                    if ($WhatIfPreference -eq $true) {
+                        Write-Host "What if: Invoking expression: '$cmd'"
+                    }
+                    else {
+                        try {
+                            Write-Debug "Invoking expression: '$cmd'"
+                            $output = Invoke-Expression $cmd
+                            if ($LASTEXITCODE -ne 0) { throw }
+                            if ($output) { Write-Host "gsettings: $output" }
+                        }
+                        catch {
+                            Write-Error "gsettings failed to set GTK theme of '$($item.modes.$Mode)'"
+                        }
+                    }
+                }
+                else {
+                    Write-Error 'GTK: Unable to set GTK theme via gsettings!'
+                }
+            }
+            'Replace_File' {
+                if (!$(Test-Path $item.modes.$Mode)) {
+                    Write-Error "Config File Replacement: $($item.modes.$Mode) does not exist!"
+                }
+                else {
+                    try {
+                        Write-Verbose "Copying item '$($item.modes.$Mode)' to '$($item.path)' forcibly."
+                        Copy-Item -Path $item.modes.$Mode `
+                                  -Destination $item.path `
+                                  -Force `
+                                  -WhatIf:$WhatIfPreference
+                    }
+                    catch { 
+                        Write-Error "Failed to overwrite $($item.path)"
+                    }
+                }
+            }
+            'Change_Cursor' {
+                if (!$OptionalCliUtilities['gsettings']) {
+                    $gsettingsMode = $($item.modes.$Mode).Split(' ')[0]
+                    $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $gsettingsMode"
+                    if ($WhatIfPreference -eq $true) {
+                        Write-Host "What if: Invoking expression: '$cmd'.)"
+                    }
+                    else {
+                        try {
+                            Write-Verbose "Invoking expression: '$cmd'."
+                            $output = Invoke-Expression $cmd
+                            if ($LASTEXITCODE -ne 0) { throw }
+                            Write-Host "gsettings: $output"
+                        }
+                        catch {
+                            Write-Error "Failed to set cursor via gsettings"
+                        }
+                    }
+                }
+                # TODO Handle KDE
+                if ($WhatIfPreference -eq $true) {
+                    Write-Host "What if: Invoking expression: '$cmd'."
+                }
+                else {
+                    $cmd = "hyprctl setcursor $($item.modes.$Mode)"
+                    try { 
+                        Write-Verbose "Invoking expression: '$cmd'."
+                        $output = Invoke-Expression $cmd
+                        if ($LASTEXITCODE -ne 0) { throw }
+                        Write-Host "hyprctl: $output"
+                    }
+                    catch { 
+                        Write-Error "Failed to set cursor via hyprctl!"
+                    }
+                }
+            }
+            'Replace_Pattern' {
+                Write-Verbose "Replacing contents of '$($item.path)' with '$($item.modes.$Mode)' using regex pattern of '$($item.pattern)'."
+                $FileContent = Get-Content $item.path
+                $FileContent = $FileContent -replace $item.pattern,$item.modes.$Mode
+                $FileContent | Set-Content $item.path -WhatIf:$WhatIfPreference
+            }
+            Default {
+                Write-Error "Unknown Config Type: '$($item.type)'."
+            }
+        }
+
+        if ($item.postCommand -ne "" -and
+            $null -ne $item.postCommand) {
+            if ($WhatIfPreference -eq $true) {
+                Write-Host "What if: Invoking expression: '$($item.preCommand)'."
+            }
+            else {
+                try {
+                    Write-Verbose "Invoking user-provided postCommand '$($item.postCommand)'."
+                    $output = Invoke-Expression -Command $item.postCommand 
+                }
+                catch {
+                    Write-Error "Unable to execute user-provided postCommand '$($item.postCommand)'."
+                    Write-Host "postCommand output: $output"
+                    Write-Warning "Please check the state of $($item.appName) due to this failure."
+                    continue
+                }
+            }
+        }
+    }
 }
 
-### Process
-
-# Edit Waybar
-"@import '$($Waybar["$Mode"])';" | Out-File $Waybar['Config'] -Force
-# Edit GTK
-"@import '$($GtkCss.$Mode)';" | Out-File $GtkCss['Config'] -Force
-Copy-Item -Path $GtkIni["$Mode"] -Destination $GtkIni['Config'] -Force
-# Refresh GTK
-gsettings set org.gnome.desktop.interface gtk-theme 'Breeze-Dark'
-# Edit QT/KDE
-& plasma-apply-colorscheme $Qt["$Mode"]
-# Edit Kitty
-Copy-Item -Path $Kitty["$Mode"] -Destination $Kitty["Config"] -Force
-# Edit Pwsh
-$Pwsh["$Mode"] | Out-File -FilePath $Pwsh["Config"] -Force
-# Edit superProductivity
-Copy-Item -Path $SuperProductivity["$Mode"] -Destination $SuperProductivity["Config"] -Force
-# Edit & restart dunst
-Copy-Item -Path $Dunst["$Mode"] -Destination $Dunst["Config"]
-killall dunst
-systemctl start dunst --user
-# Edit rofi
-Copy-Item -Path $Rofi["$Mode"] -Destination $Rofi["Config"]
-# Edit Cursor
-gsettings set org.gnome.desktop.interface cursor-theme $Cursor["$Mode"]
-hyprctl setcursor $Cursor["$Mode"] 24
-# Edit TaskWarrior
-$TaskwarriorContent = Get-Content $Taskwarrior["Config"]
-$TaskwarriorContent = $TaskwarriorContent -replace $Taskwarrior["Pattern"],$TaskWarrior["$Mode"]
-$TaskwarriorContent | Set-Content $Taskwarrior["Config"]
-# Edit Clipse
-Copy-Item -Path $Clipse["$Mode"] -Destination $Clipse["Config"] -Force
-# Edit Starship
-$StarshipContent = Get-Content $Starship["Config"]
-$StarshipContent = $StarshipContent -replace $Starship["Pattern"],$Starship["$Mode"]
-$StarshipContent | Set-Content $Starship['Config']
-
-# Edit Hyprland
-$Hyprland["$Mode"] | Out-File -FilePath $Hyprland["Config"] -Force
-& hyprctl reload
+end {}

@@ -1,0 +1,155 @@
+{
+    "applications": [
+        {
+            "appName": "Waybar",
+            "type": "Replace_FileContents",
+            "path": "~/.config/waybar/style.css",
+            "modes": {
+                "Light": "@import 'style-light.css';",
+                "Dark": "@import 'style-dark.css';"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "GTK3-css",
+            "type": "Replace_FileContents",
+            "path": "~/.config/gtk-3.0/gtk.css",
+            "modes": {
+                "Light": "@import 'colors-light.css';",
+                "Dark": "@import 'colors-dark.css';"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "GTK3-ini",
+            "type": "Replace_File",
+            "path": "~/.config/gtk-3.0/settings.ini",
+            "modes": {
+                "Light": "~/.config/gtk-3.0/settings-light.ini",
+                "Dark": "~/.config/gtk-3.0/settings-dark.ini"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "GTK",
+            "type": "GTK_Theme",
+            "modes": {
+                "Light": "Breeze",
+                "Dark": "Breeze-Dark"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "KDE Color Scheme",
+            "type": "KDE_ColorScheme",
+            "modes": {
+                "Light": "HyprlandLight",
+                "Dark": "BinaryInkBlack"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Kitty",
+            "type": "Replace_File",
+            "path": "~/.config/kitty/kitty.conf",
+            "modes": {
+                "Light": "~/.config/kitty/kitty-light.conf",
+                "Dark": "~/.config/kitty/kitty-dark.conf"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "PowerShell",
+            "type": "Replace_FileContents",
+            "path": "~/.config/powershell/powershell.d/00-env-theme.ps1",
+            "modes": {
+                "Light": "$env:PWSH_THEME_LIGHT = 1",
+                "Dark": "$env:PWSH_THEME_LIGHT = 0"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Hyprland Config",
+            "type": "Replace_FileContents",
+            "path": "~/.config/hypr/hyprland.conf.d/theme-mode.conf",
+            "modes": {
+                "Light": "$themeMode = light",
+                "Dark": "$themeMode = dark"
+            },
+            "preCommand": "",
+            "postCommand": "hyprctl reload"
+        },
+        {
+            "appName": "Rofi",
+            "type": "Replace_File",
+            "path": "~/.config/rofi/current.rasi",
+            "modes": {
+                "Light": "~/.config/rofi/light.rasi",
+                "Dark": "~/.config/rofi/dark.rasi"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Dunst",
+            "type": "Replace_File",
+            "path": "~/.config/dunst/dunstrc.d/98-theme.conf",
+            "modes": {
+                "Light": "~/.config/dunst/themes/vscode-light.conf",
+                "Dark": "~/.config/dunst/themes/vscode-dark.conf"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "System Cursor",
+            "type": "Change_Cursor",
+            "modes": {
+                "Light": "Bibata-Modern-Ice 24",
+                "Dark": "Bibata-Modern-Classic 24"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Taskwarrior",
+            "type": "Replace_Pattern",
+            "path": "~/.config/task/theme",
+            "pattern": "(?<=^|\\s)(\\w+-\\w+)\\.theme(?=\\s|$)",
+            "modes": {
+                "Light": "light-256.theme",
+                "Dark": "dark-256.theme"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Clipse",
+            "type": "Replace_File",
+            "path": "~/.config/clipse/custom_theme.json",
+            "modes": {
+                "Light": "~/.config/clipse/themes/vscode_light.json",
+                "Dark": "~/.config/clipse/themes/vscode_dark.json"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "Starship",
+            "type": "Replace_Pattern",
+            "path": "~/.config/starship/starship.toml",
+            "pattern": "(?<=palette\\s*=\\s*\").*?(?=\")",
+            "modes": {
+                "Light": "vscode-light",
+                "Dark": "vscode-dark"
+            }
+        }
+    ]
+}
