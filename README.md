@@ -9,6 +9,7 @@ A PowerShell Script for Automating Themes in Hyprland
     - [Required](#required)
     - [Optional](#optional)
   - [How to use](#how-to-use)
+    - [Examples](#examples)
     - [The Config File](#the-config-file)
       - [Properties](#properties)
       - [Mode purpose by type](#mode-purpose-by-type)
@@ -76,6 +77,25 @@ effect.
 ## How to use
 
 1. Download the `Set-HyprlandTheme.ps1` script and place in a directory of your choosing.
+2. Copy and modify the `config.json` file and place in one of the locations listed in the next
+   section (or provide the path via parameter when calling the script).
+
+### Examples
+
+```powershell
+# Activate 'Light' mode:
+Set-HyprlandTheme -Mode 'Light'
+
+# Activate "Dark" mode, with custom script location:
+Set-HyprlandTheme -Mode 'Dark' -ConfigPath '~/myFolder/config.json'
+
+# Activate "CustomColor" mode, with Verbose & Debug information:
+Set-HyprlandTheme -Mode 'CustomColor' -Verbose -Debug
+
+# Activate "Dark" mode as a dry-run
+Set-HyprlandTheme -Mode 'Dark' -WhatIf
+
+```
 
 ### The Config File
 
