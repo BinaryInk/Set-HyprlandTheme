@@ -76,6 +76,28 @@ effect.
 ## How to use
 
 1. Download the `Set-HyprlandTheme.ps1` script and place in a directory of your choosing.
+2. Ensure the script is executable: `chmod +x Set-HyprlandTheme.ps1`
+3. Set up a `config.json` file in one of the four recommended locations or
+   specify path via parameter (See [The Config File](#the-config-file) below)
+4. Run the script
+
+```powershell
+# Run with implicit config file
+./Set-HyprlandTheme.ps1 Dark
+
+# Run specifying config file
+./Set-HyprlandTheme.ps1 -Mode 'Dark' -Config ~/myConfig.json
+
+# Run with verbose output
+./Set-HyprlandTheme.ps1 Dark -Verbose
+
+# Dry run
+./Set-HyprlandTheme.ps1 Light -WhatIf
+
+# Import function to shell and then run (importing can be useful to add to your profile)
+. ~/my/custom/path/Set-HyprlandTheme.ps1
+Set-HyprlandTheme Ayu
+```
 
 ### The Config File
 

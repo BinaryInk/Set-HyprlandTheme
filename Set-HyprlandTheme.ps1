@@ -30,12 +30,18 @@ using namespace System.Collections.Generic
 
 param(
     # Theme mode to apply
-    [Parameter(Mandatory = $true, Position = 0)]
+    [Parameter(
+        Mandatory = $true, 
+        Position = 0,
+        HelpMessage = "The mode to switch to (as defined in config.json)")]
     [string]
     $Mode,
 
     # Config file path
-    [Parameter(Mandatory = $false, Position = 1)]
+    [Parameter(
+        Mandatory = $false, 
+        Position = 1,
+        HelpMessage = "Path to configuration file")]
     [string]
     $ConfigPath
 )
