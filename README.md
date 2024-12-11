@@ -9,20 +9,22 @@ A PowerShell Script for Automating Themes in Hyprland
     - [Required](#required)
     - [Optional](#optional)
   - [How to use](#how-to-use)
-    - [Examples](#examples)
-    - [The Config File](#the-config-file)
-      - [Properties](#properties)
-      - [Mode purpose by type](#mode-purpose-by-type)
+    - [Running directly from script](#running-directly-from-script)
+    - [Dot-sourcing](#dot-sourcing)
+  - [The Configuration File](#the-configuration-file)
+    - [Properties](#properties)
+    - [Mode purpose by type](#mode-purpose-by-type)
   - [Issues \& Contribution](#issues--contribution)
   - [Roadmap](#roadmap)
     - [List of Potential Improvements](#list-of-potential-improvements)
 
 ## About
 
-This is a simple,  configurable PowerShell script to enable theme switching across various programs
-in Hyprland. Instead of altering the script directly or managing a myriad of separate scripts, a
-*.json configuration file is leveraged. The config can reside in one of three default locations or
-be passed directly to the script via parameter.
+This is a simple,  configurable PowerShell script to enable theme switching
+across various programs in Hyprland. Instead of altering the script directly or
+managing a myriad of separate scripts, a *.json configuration file is leveraged.
+The config can reside in one of three default locations or be passed directly to
+the script via parameter.
 
 ## Features
 
@@ -35,22 +37,25 @@ The config file allows for the following configuration types:
 - **Replace_Pattern**
   - Replaces part(s) of a file using a regex pattern.
 - **GTK_Theme**
-  - Changes the theme preset for GTK. Currently, only one command, but may be expanded later; use
-    the various *Replace* types above to modify CSS files.
+  - Changes the theme preset for GTK. Currently, only one command, but may be
+    expanded later; use the various *Replace* types above to modify CSS files.
 - **KDE_ColorScheme**
-  - Leverages a KDE application to change between different *.color files. These can be edited using
-    the KDE System Settings application from within Hyprland and *shouldn't* require KDE Plasma to
-    be installed, though I haven't tested what specific components of Plasma are required.
+  - Leverages a KDE application to change between different *.color files. These
+    can be edited using the KDE System Settings application from within Hyprland
+    and *shouldn't* require KDE Plasma to be installed, though I haven't tested
+    what specific components of Plasma are required.
 - **Change_Cursor**
-  - Changes the mouse cursor. The target cursor must be installed to use and loose files cannot be
-    used. This presently leverages Hyprcursor and GTK's gsettings application; this appears to cover
-    all bases, but I have some ideas on how to expand this to be more thorough (e.g., persistence on
+  - Changes the mouse cursor. The target cursor must be installed to use and
+    loose files cannot be used. This presently leverages Hyprcursor and GTK's
+    gsettings application; this appears to cover all bases, but I have some
+    ideas on how to expand this to be more thorough (e.g., persistence on
     restarts).
 
-With the above types provided, one should be able to create a fairly thorough solution for their
-setup. GTK and KDE provide the ability for QT and GTK apps to automatically adapt to the changes,
-Change_Cursor covers the cursor in the live environment, and the three Replace_* types allow for
-customized configurations for apps with their own theme files (such as Dunst or Rofi).
+With the above types provided, one should be able to create a fairly thorough
+solution for their setup. GTK and KDE provide the ability for QT and GTK apps to
+automatically adapt to the changes, Change_Cursor covers the cursor in the live
+environment, and the three Replace_* types allow for customized configurations
+for apps with their own theme files (such as Dunst or Rofi).
 
 ## Dependencies
 
@@ -60,57 +65,78 @@ customized configurations for apps with their own theme files (such as Dunst or 
 
 ### Optional
 
-The script will not fail without these, but certain types may not work correctly without them or may
-have no effect at all. This list has not been thoroughly tested and therefore is not exhaustive.
+The script will not fail without these, but certain types may not work correctly
+without them or may have no effect at all. This list has not been thoroughly
+tested and therefore is not exhaustive.
 
-- [Hyprland](https://hyprland.org/) - In theory, Hyprland is not *required*, but it was made with
-  Hyprland in mind.
-- [gsettings](https://wiki.archlinux.org/title/Dark_mode_switching#GTK) - *Required* for the
-  `GTK_Theme` type and *used* in the `Change_Cursors` type.
+- [Hyprland](https://hyprland.org/) - In theory, Hyprland is not *required*, but
+  it was made with Hyprland in mind.
+- [gsettings](https://wiki.archlinux.org/title/Dark_mode_switching#GTK) -
+  *Required* for the `GTK_Theme` type and *used* in the `Change_Cursors` type.
 - `plasma-apply-colorscheme` - *Required* for the `KDE_ColorScheme` type.
-- [Hyprcursor](https://wiki.hyprland.org/Hypr-Ecosystem/hyprcursor/) - *Used* in the
-  `Change_Cursors` type to change the cursor.
+- [Hyprcursor](https://wiki.hyprland.org/Hypr-Ecosystem/hyprcursor/) - *Used* in
+  the `Change_Cursors` type to change the cursor.
 
-NOTE: If both `gsettings` and Hyprcursor aren't installed, the `Change_Cursors` type  will have no
-effect.
+NOTE: If both `gsettings` and Hyprcursor aren't installed, the `Change_Cursors`
+type  will have no effect.
 
 ## How to use
 
-1. Download the `Set-HyprlandTheme.ps1` script and place in a directory of your choosing.
-2. Copy and modify the `config.json` file and place in one of the locations listed in the next
-   section (or provide the path via parameter when calling the script).
+### Running directly from script
 
-### Examples
+1. Download the `Set-HyprlandTheme.ps1` script and place in a directory of your
+   choosing.
+2. Ensure the script is executable: `chmod +x Set-HyprlandTheme.ps1`
+3. Set up a `config.json` file in one of the four recommended locations or
+   specify path via parameter (See [The Config File](#the-config-file) below)
+4. Run the script
 
 ```powershell
-# Activate 'Light' mode:
-Set-HyprlandTheme -Mode 'Light'
+# Run with implicit config file, setting the theme mode to 'Dark'
+./Set-HyprlandTheme.ps1 Dark
 
-# Activate "Dark" mode, with custom script location:
-Set-HyprlandTheme -Mode 'Dark' -ConfigPath '~/myFolder/config.json'
+# Run specifying the location of the config file, setting the theme mode to 'MyTheme'
+./Set-HyprlandTheme.ps1 -Mode 'MyTheme' -Config '~/myConfig.json'
 
-# Activate "CustomColor" mode, with Verbose & Debug information:
-Set-HyprlandTheme -Mode 'CustomColor' -Verbose -Debug
+# Run with verbose output
+./Set-HyprlandTheme.ps1 Dark -Verbose
 
-# Activate "Dark" mode as a dry-run
-Set-HyprlandTheme -Mode 'Dark' -WhatIf
-
+# Dry run
+./Set-HyprlandTheme.ps1 Light -WhatIf
 ```
 
-### The Config File
+### Dot-sourcing
 
-See the included config file for my working config on how to set up. The config file will
-automatically be picked up if it is in one of the following default locations (checked in this
-order):
+This script can also be dot-sourced into a session's scope; this can be useful
+for including in the profile. 
+
+> **IMPORTANT:** 
+> 
+> Due to the inclusion of a mandatory parameter, you **must**
+> specify `-Mode` when dot-sourcing the script. The value passed to `-Mode` is
+> irrelevant and has no effect on the imported function. See the example below.
+
+```powershell
+# Import function to shell and then run (importing can be useful to add to your profile)
+. ~/my/custom/path/Set-HyprlandTheme.ps1 -Mode 'ThisValueIsDiscarded'
+Set-HyprlandTheme Ayu
+```
+
+## The Configuration File
+
+See the included config file for my working config on how to set up. The config
+file will automatically be picked up if it is in one of the following default
+locations (checked in this order):
 
 - $PSScriptRoot/config.json (i.e., in the same folder as the script)
 - ~/.config/Set-HyprlandTheme/config.json
 - ~/.config/hypr/Set-HyprlandTheme/config.json
 - ~/.config/hypr/Set-HyprlandTheme.json
 
-#### Properties
+### Properties
 
-Each entry has a number of required properties based on the type of configuration:
+Each entry has a number of required properties based on the type of
+configuration:
 
 | Property    | Purpose                                                                                                                                                                                                                                                                       | Required By Type(s)                                       |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
@@ -122,7 +148,7 @@ Each entry has a number of required properties based on the type of configuratio
 | postCommand | An optional one-liner command that will be run after the primary action of the type; typically used for refreshing or restarting an application                                                                                                                               | Not Required                                              |
 | pattern     | A regex pattern                                                                                                                                                                                                                                                               | `Replace_Pattern`                                         |
 
-#### Mode purpose by type
+### Mode purpose by type
 
 Each type expects a slightly different string for a given mode:
 
@@ -137,42 +163,47 @@ Each type expects a slightly different string for a given mode:
 
 ## Issues & Contribution
 
-Feel free to submit any issues or fixes via PR if you use this script and find any; if it is
-germane to the goal of the script, I will look into fixing it it. If it is a feature request that
-is outside of the scope of this project, I may put it on a to do list for the binary PowerShell
-module I'm working on for Hyprland (see roadmap below).
+Feel free to submit any issues or fixes via PR if you use this script and find
+any; if it is germane to the goal of the script, I will look into fixing it it.
+If it is a feature request that is outside of the scope of this project, I may
+put it on a to do list for the binary PowerShell module I'm working on for
+Hyprland (see roadmap below).
 
-**If you submit an issue, please provide the output from the script with the `-Verbose` and `-Debug`
-parameters and provide the contents your configuration `json` file.**
+**If you submit an issue, please provide the output from the script with the
+`-Verbose` and `-Debug` parameters and provide the contents your configuration
+`json` file.**
 
 ## Roadmap
 
-To preface: this script is provided as-is, and is more or less final, so there isn't much of a
-roadmap.
+To preface: this script is provided as-is, and is more or less final, so there
+isn't much of a roadmap.
 
-*Eventually*, the functionality of this script will be folded into a PowerShell binary module that I
-am working on.  The existence of this script predated that project and I wanted to have a more
-solid concept of how I wanted to approach rewriting it in C#, so I worked to make this more of a
-generalized project vs. a specific one for my own use (I was actively using the old hardcoded
-predecessor to this script, occasionally adding new programs, and I desired a simple way to add
-applications until the binary module is ready for use).
+*Eventually*, the functionality of this script will be folded into a PowerShell
+binary module that I am working on.  The existence of this script predated that
+project and I wanted to have a more solid concept of how I wanted to approach
+rewriting it in C#, so I worked to make this more of a generalized project vs. a
+specific one for my own use (I was actively using the old hardcoded predecessor
+to this script, occasionally adding new programs, and I desired a simple way to
+add applications until the binary module is ready for use).
 
-While this should be considered the final product, there are some limitations that I'm interested in
-tackling that *may or may not* happen before the binary module is ready. Some of these improvements
-will likely just be a command added to the `postCommand` property in the config file provided in
-this repo.
+While this should be considered the final product, there are some limitations
+that I'm interested in tackling that *may or may not* happen before the binary
+module is ready. Some of these improvements will likely just be a command added
+to the `postCommand` property in the config file provided in this repo.
 
 ### List of Potential Improvements
 
-- Refreshing of open windows that use GTK for theming (e.g., Code, Firefox).  This is probably my
-  top concern and annoyance at the moment. I'm not sure that this is something that GTK is capable
-  of off-hand, but *am* interested in addressing it before I add this to the binary module if it is
-  possible, as there are a lot of applications that seem to look for what mode GTK is in or
+- Refreshing of open windows that use GTK for theming (e.g., Code, Firefox).
+  This is probably my top concern and annoyance at the moment. I'm not sure that
+  this is something that GTK is capable of off-hand, but *am* interested in
+  addressing it before I add this to the binary module if it is possible, as
+  there are a lot of applications that seem to look for what mode GTK is in or
   leverage GTK's theme colors (e.g., VSCode, Firefox, Thunderbird, etc.)
   - (**NOTE:** QT apps *do* refresh when changed)
 - Refreshing of open Kitty windows
-- Support for non-KDE QT color switching (i.e., using qt6ct and/or qt5ct). Ideally, I'd like to
-  eventually remove Plasma from my devices as I no longer use it.
+- Support for non-KDE QT color switching (i.e., using qt6ct and/or qt5ct).
+  Ideally, I'd like to eventually remove Plasma from my devices as I no longer
+  use it.
 - Wallpaper(s)
 - Automated setup via systemd and/or cron:
   - Static times per day
