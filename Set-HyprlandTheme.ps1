@@ -85,7 +85,7 @@ begin {
             throw "Config not found: '${Config}'"
         }
         else {
-            [string]$ConfigExtension = Get-ChildItem -Path $ConfigPath | 
+            [string]$ConfigExtension = Get-ChildItem -Path $ConfigPath| 
                 Select-Object -ExpandProperty 'Extension'
         }
 
@@ -93,12 +93,14 @@ begin {
             $ConfigExtension -ne '.jsonc') {
             throw "Config file extension indicates the provided config file is not a json file."
         }
-        Remove-Variable -Name 'ConfigExtension' 
+        Remove-Variable -Name 'ConfigExtension'
     }
 
     Write-Debug "Loading config file ($ConfigPath)..."
     try { $Config = Get-Content $ConfigPath | ConvertFrom-Json }
     catch { throw 'Cannot load config JSON.' }
+
+    Write-Debug "Configuration Settings: $Config"
 
     Write-Debug "Checking config entries..."
     foreach ($item in $Config.applications) {
@@ -125,17 +127,15 @@ process {
         Write-Debug "Checking for user-provided preCommand..."
         if ($item.preCommand -ne "" -and
             $null -ne $item.preCommand) {
-            Write-Verbose "Invoking user-provided preCommand '$($item.preCommand)'..."
-            if ($WhatIfPreference -eq $true) {
-                Write-Host "What if: Invoking expression: $($item.preCommand)"
-            }
-            else {
+            if ($PSCmdlet.ShouldProcess("This Computer", "Invoke Expression: ""$($item.preCommand)""")) {
                 try {
-                    $output = Invoke-Expression -Command $item.preCommand
+                    Write-Verbose "Invoking user-provided preCommand '$($item.preCommand)'..."
+                    Write-Host "precommand: $(Invoke-Expression -Command $item.preCommand `
+                                                                -Verbose:$VerbosePreference `
+                                                                -Debug:$DebugPreference )"
                 }
                 catch {
                     Write-Error "Unable to execute user-provided preCommand '$($item.preCommand)'."
-                    Write-Host "preCommand Output: $output"
                     Write-Warning "Skipping $($item.appName)!"
                     continue
                 }
@@ -145,22 +145,27 @@ process {
         Write-Debug "$($item.appName) type: $($item.type)"
         switch ($item.type) {
             'Replace_FileContents' {
-                try { $item.modes.$Mode | Out-File $item.path -WhatIf:$WhatIfPreference }
-                catch { Write-Error "Unable to write to $($item.path)" }
+                if ($PSCmdlet.ShouldProcess($item.path, "Out-File")) {
+                    try { 
+                        $item.modes.$Mode | 
+                            Out-File $item.path -Force `
+                                                -Verbose:$VerbosePreference `
+                                                -Debug:$DebugPreference
+                    }
+                    catch { 
+                        Write-Error "Unable to write to $($item.path)" 
+                    }
+                }
             }
             'KDE_ColorScheme' {
                 if (!$OptionalCliUtilities['plasma-apply-colorscheme']) {
                     $cmd = "plasma-apply-colorscheme $($item.modes.$Mode)"
-
-                    if ($WhatIfPreference -eq $true) {
-                        Write-Host "What if: Invoking expression: '$cmd'."
-                    }
-                    else {
+                    if ($PSCmdlet.ShouldProcess("KDE", "Apply ""$Mode"" Color Scheme")) {
                         try {
                             Write-Debug "Invoking expression: '$cmd'."
-                            $output = Invoke-Expression $cmd
-                            if ($LASTEXITCODE -ne 0) { throw }
-                            Write-Host "plasma-apply-colorscheme: $output" 
+                            Write-Host "plasma-apply-colorscheme: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                                           -Debug:$DebugPreference)"
+                            if ($LASTEXITCODE -ne 0) { throw } 
                         }
                         catch { 
                             Write-Error "plasma-apply-colorscheme failed to set $($item.modes.$Mode)" 
@@ -174,16 +179,12 @@ process {
             'GTK_Theme' {
                 if (!$OptionalCliUtilities['gsettings']) {
                     $cmd = "gsettings set org.gnome.desktop.interface gtk-theme '$($item.modes.$Mode)'"
-
-                    if ($WhatIfPreference -eq $true) {
-                        Write-Host "What if: Invoking expression: '$cmd'"
-                    }
-                    else {
+                    if ($PSCmdlet.ShouldProcess("GTK", """$Mode"" Theme")) {
                         try {
-                            Write-Debug "Invoking expression: '$cmd'"
-                            $output = Invoke-Expression $cmd
+                            Write-Debug "Invoking expression: '$cmd'."
+                            Write-Host "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                            -Debug:$DebugPreference)"
                             if ($LASTEXITCODE -ne 0) { throw }
-                            if ($output) { Write-Host "gsettings: $output" }
                         }
                         catch {
                             Write-Error "gsettings failed to set GTK theme of '$($item.modes.$Mode)'"
@@ -195,19 +196,21 @@ process {
                 }
             }
             'Replace_File' {
-                if (!$(Test-Path $item.modes.$Mode)) {
-                    Write-Error "Config File Replacement: $($item.modes.$Mode) does not exist!"
-                }
-                else {
-                    try {
-                        Write-Verbose "Copying item '$($item.modes.$Mode)' to '$($item.path)' forcibly."
-                        Copy-Item -Path $item.modes.$Mode `
-                                  -Destination $item.path `
-                                  -Force `
-                                  -WhatIf:$WhatIfPreference
+                if ($PSCmdlet.ShouldProcess($item.path, "Replace file")) {
+                    if (!$(Test-Path $item.modes.$Mode)) {
+                        Write-Error "Config File Replacement: $($item.modes.$Mode) does not exist!"
                     }
-                    catch { 
-                        Write-Error "Failed to overwrite $($item.path)"
+                    else {
+                        try {
+                            Copy-Item -Path $item.modes.$Mode `
+                                      -Destination $item.path `
+                                      -Force `
+                                      -Verbose:$VerbosePreference `
+                                      -Debug:$DebugPreference
+                        }
+                        catch { 
+                            Write-Error "Failed to overwrite $($item.path)"
+                        }
                     }
                 }
             }
@@ -215,32 +218,27 @@ process {
                 if (!$OptionalCliUtilities['gsettings']) {
                     $gsettingsMode = $($item.modes.$Mode).Split(' ')[0]
                     $cmd = "gsettings set org.gnome.desktop.interface cursor-theme $gsettingsMode"
-                    if ($WhatIfPreference -eq $true) {
-                        Write-Host "What if: Invoking expression: '$cmd'.)"
-                    }
-                    else {
+                    if ($PSCmdlet.ShouldProcess("GTK Cursor", "Set Cursor to $gsettingsMode")) {
                         try {
                             Write-Verbose "Invoking expression: '$cmd'."
-                            $output = Invoke-Expression $cmd
+                            Write-Host "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                            -Debug:$DebugPreference)"
                             if ($LASTEXITCODE -ne 0) { throw }
-                            Write-Host "gsettings: $output"
                         }
                         catch {
-                            Write-Error "Failed to set cursor via gsettings"
+                            Write-Error "Failed to set cursor of ""$gsettingsMode"" via gsettings"
                         }
                     }
                 }
                 # TODO Handle KDE
-                if ($WhatIfPreference -eq $true) {
-                    Write-Host "What if: Invoking expression: '$cmd'."
-                }
-                else {
+                if ($PSCmdlet.ShouldProcess("Hyprcursor", "Set Cursor to $($item.modes.$Mode)")) {
                     $cmd = "hyprctl setcursor $($item.modes.$Mode)"
                     try { 
                         Write-Verbose "Invoking expression: '$cmd'."
-                        $output = Invoke-Expression $cmd
+                        Write-Host 'hyprctl: ' -NoNewline
+                        Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                               -Debug:$DebugPreference
                         if ($LASTEXITCODE -ne 0) { throw }
-                        Write-Host "hyprctl: $output"
                     }
                     catch { 
                         Write-Error "Failed to set cursor via hyprctl!"
@@ -248,10 +246,14 @@ process {
                 }
             }
             'Replace_Pattern' {
-                Write-Verbose "Replacing contents of '$($item.path)' with '$($item.modes.$Mode)' using regex pattern of '$($item.pattern)'."
-                $FileContent = Get-Content $item.path
-                $FileContent = $FileContent -replace $item.pattern,$item.modes.$Mode
-                $FileContent | Set-Content $item.path -WhatIf:$WhatIfPreference
+                if ($PSCmdlet.ShouldProcess($item.path, "Replace contents with ""$($item.modes.$Mode)""  using regex pattern ""$($item.pattern)""")) {
+                    $FileContent = Get-Content $item.path
+                    $FileContent = $FileContent -replace $item.pattern,$item.modes.$Mode
+                    $FileContent | 
+                        Set-Content $item.path -Force `
+                                               -Verbose:$VerbosePreference `
+                                               -Debug:$DebugPreference
+                }
             }
             Default {
                 Write-Error "Unknown Config Type: '$($item.type)'."
@@ -260,17 +262,15 @@ process {
 
         if ($item.postCommand -ne "" -and
             $null -ne $item.postCommand) {
-            if ($WhatIfPreference -eq $true) {
-                Write-Host "What if: Invoking expression: '$($item.preCommand)'."
-            }
-            else {
+            if ($PSCmdlet.ShouldProcess("This Computer", "Invoke Expression: ""$($item.postCommand)""")) {
                 try {
                     Write-Verbose "Invoking user-provided postCommand '$($item.postCommand)'."
-                    $output = Invoke-Expression -Command $item.postCommand 
+                    Write-Host "postCommand: $(Invoke-Expression -Command $item.postCommand `
+                                                                 -Verbose:$VerbosePreference `
+                                                                 -Debug:$DebugPreference)"
                 }
                 catch {
                     Write-Error "Unable to execute user-provided postCommand '$($item.postCommand)'."
-                    Write-Host "postCommand output: $output"
                     Write-Warning "Please check the state of $($item.appName) due to this failure."
                     continue
                 }
