@@ -12,9 +12,19 @@
             "postCommand": ""
         },
         {
+            "appName": "GTK",
+            "type": "GTK_Theme",
+            "modes": {
+                "Light": "Breeze",
+                "Dark": "Breeze-Dark"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
             "appName": "GTK3-css",
             "type": "Replace_FileContents",
-            "path": "~/.config/gtk-3.0/gtk.css",
+            "path": "~/.config/gtk-3.0/colors.css",
             "modes": {
                 "Light": "@import 'colors-light.css';",
                 "Dark": "@import 'colors-dark.css';"
@@ -34,11 +44,23 @@
             "postCommand": ""
         },
         {
-            "appName": "GTK",
-            "type": "GTK_Theme",
+            "appName": "GTK4-css",
+            "type": "Replace_FileContents",
+            "path": "~/.config/gtk-3.0/colors.css",
             "modes": {
-                "Light": "Breeze",
-                "Dark": "Breeze-Dark"
+                "Light": "@import 'colors-light.css';",
+                "Dark": "@import 'colors-dark.css';"
+            },
+            "preCommand": "",
+            "postCommand": ""
+        },
+        {
+            "appName": "GTK4-ini",
+            "type": "Replace_File",
+            "path": "~/.config/gtk-3.0/settings.ini",
+            "modes": {
+                "Light": "~/.config/gtk-3.0/settings-light.ini",
+                "Dark": "~/.config/gtk-3.0/settings-dark.ini"
             },
             "preCommand": "",
             "postCommand": ""
@@ -120,12 +142,11 @@
         },
         {
             "appName": "Taskwarrior",
-            "type": "Replace_Pattern",
-            "path": "~/.config/task/theme",
-            "pattern": "(?<=^|\\s)(\\w+-\\w+)\\.theme(?=\\s|$)",
+            "type": "Replace_File",
+            "path": "~/.config/task/current.theme",
             "modes": {
-                "Light": "light-256.theme",
-                "Dark": "dark-256.theme"
+                "Light": "~/.config/task/themes/light-256.theme",
+                "Dark": "~/.config/task/themes/dark-256.theme"
             },
             "preCommand": "",
             "postCommand": ""
