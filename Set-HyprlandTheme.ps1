@@ -22,8 +22,46 @@
     - **GitHub:** <https://www.github.com/BinaryInk/>
 #>
 
-using namespace System.Collections.Generic
+<#
+.Synopsis
+  Changes themes according to settings specified in a specially-crafted JSON
+  file.
 
+.Description
+  Changes various theme files and executes specific commands defined in a JSON
+  file. This can include custom scripts and commands, in addition to leveraging
+  commandline applications such as 'gsettings' directoy.
+
+.Parameter Mode
+  The mode to change the theme to. The Mode specified must be included in each
+  entry in the configuration JSON file.
+
+.Parameter ConfigPath
+  The path to the configuration JSON file.
+
+.Example
+  # Run with implicit config file, setting the theme mode to 'Dark'
+  ./Set-HyprlandTheme.ps1 Dark
+
+.Example
+  # Run specifying the location of the config file, setting the theme mode to 'MyTheme'
+  ./Set-HyprlandTheme.ps1 -Mode 'MyTheme' -Config '~/.myConfig.json'
+
+.Example
+  # Run with verbose output
+  ./Set-HyprlandTheme.ps1 Dark -Verbose
+
+.Example
+  # Dry run using -WhatIf
+  ./Set-HyprlandTheme.ps1 Dark -WhatIf
+
+.Example
+  # Dot-source the function from the script (Important: You must provide a value for -Mode)
+  . ./Set-HyprlandTheme.ps1 FillerValue
+  # Run the imported function.
+  Set-HyprlandTheme Dark
+#>
+using namespace System.Collections.Generic
 param(
     # Theme mode to apply
     [Parameter(
@@ -42,6 +80,39 @@ param(
     $ConfigPath
 )
 
+<#
+.Synopsis
+  Changes themes according to settings specified in a specially-crafted JSON
+  file.
+
+.Description
+  Changes various theme files and executes specific commands defined in a JSON
+  file. This can include custom scripts and commands, in addition to leveraging
+  commandline applications such as 'gsettings' directoy.
+
+.Parameter Mode
+  The mode to change the theme to. The Mode specified must be included in each
+  entry in the configuration JSON file.
+
+.Parameter ConfigPath
+  The path to the configuration JSON file.
+
+.Example
+  # Run with implicit config file, setting the theme mode to 'Dark'
+  Set-HyprlandTheme.ps1 Dark
+
+.Example
+  # Run specifying the location of the config file, setting the theme mode to 'MyTheme'
+  Set-HyprlandTheme.ps1 -Mode 'MyTheme' -Config '~/.myConfig.json'
+
+.Example
+  # Run with verbose output
+  Set-HyprlandTheme.ps1 Dark -Verbose
+
+.Example
+  # Dry run using -WhatIf
+  Set-HyprlandTheme.ps1 Dark -WhatIf
+#>
 function Set-HyprlandTheme {
     [CmdletBinding(
         SupportsShouldProcess = $true
