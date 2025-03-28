@@ -50,6 +50,15 @@ The config file allows for the following configuration types:
     gsettings application; this appears to cover all bases, but I have some
     ideas on how to expand this to be more thorough (e.g., persistence on
     restarts).
+- **SymLink**
+  - Creates a symbolic link or overwrites an existing file or symbolic link,
+    using the `path` value as the symbolic link and the values under `mode` as
+    the targets.
+    - IMPORTANT: You must use fully-qualified paths *or* valid relative paths 
+      according to the location of the symbolic link being created when using 
+      this; there are currently no checks to ensure a symbolic link is valid nor
+      expansion of environment variables (or aliases, such as `~`) prior to the 
+      creation of the symbolic link.
 
 With the above types provided, one should be able to create a fairly thorough
 solution for their setup. GTK and KDE provide the ability for QT and GTK apps to
@@ -70,7 +79,8 @@ without them or may have no effect at all. This list has not been thoroughly
 tested and therefore is not exhaustive.
 
 - [Hyprland](https://hyprland.org/) - In theory, Hyprland is not *required*, but
-  it was made with Hyprland in mind.
+  it was made with Hyprland in mind. I have not tested the script for use 
+  outside of Hyprland, but it should work in pretty much any other environment.
 - [gsettings](https://wiki.archlinux.org/title/Dark_mode_switching#GTK) -
   *Required* for the `GTK_Theme` type and *used* in the `Change_Cursors` type.
 - `plasma-apply-colorscheme` - *Required* for the `KDE_ColorScheme` type.
@@ -78,7 +88,7 @@ tested and therefore is not exhaustive.
   the `Change_Cursors` type to change the cursor.
 
 NOTE: If both `gsettings` and Hyprcursor aren't installed, the `Change_Cursors`
-type  will have no effect.
+type will have no effect.
 
 ## How to use
 
@@ -108,7 +118,7 @@ type  will have no effect.
 ### Dot-sourcing
 
 This script can also be dot-sourced into a session's scope; this can be useful
-for including in the profile. 
+for including in a user profile. 
 
 > **IMPORTANT:** 
 > 
@@ -160,6 +170,7 @@ Each type expects a slightly different string for a given mode:
 | GTK_Theme            | The mode is the name of the GTK theme to set                                                          |
 | KDE_ColorScheme      | The mode is the name of the KDE Color Scheme to set                                                   |
 | Change_Cursor        | The mode is the name of the installed cursor to apply to the system along with the size of the cursor |
+| SymLink              | The mode is the target of the symbolic link created at `path`.                                        |
 
 ## Issues & Contribution
 
@@ -179,7 +190,7 @@ To preface: this script is provided as-is, and is more or less final, so there
 isn't much of a roadmap.
 
 *Eventually*, the functionality of this script will be folded into a PowerShell
-binary module that I am working on.  The existence of this script predated that
+binary module that I am working on. The existence of this script predated that
 project and I wanted to have a more solid concept of how I wanted to approach
 rewriting it in C#, so I worked to make this more of a generalized project vs. a
 specific one for my own use (I was actively using the old hardcoded predecessor
