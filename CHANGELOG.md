@@ -8,6 +8,12 @@
     - [Features](#features-1)
   - [Version 1.0.0](#version-100)
 
+## Version 1.1.0
+
+**2025-03-27**
+
+- Added 'SymLink' type for creating symbolic links (alternative to Replace_File)
+
 ## Version 1.0.2
 
 **2024-12-11**
