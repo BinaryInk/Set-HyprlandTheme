@@ -121,8 +121,8 @@
     },
     {
       "appName": "Dunst",
-      "type": "Replace_File",
-      "path": "~/.config/dunst/dunstrc.d/98-theme.conf",
+      "type": "Symlink",
+      "path": "~/.config/dunst/dunstrc.d/19-theme.conf",
       "modes": {
         "Light": "~/.config/dunst/themes/vscode-light.conf",
         "Dark": "~/.config/dunst/themes/vscode-dark.conf"
@@ -179,6 +179,15 @@
       "modes": {
         "Light": "/home/binaryink/Dev/Personal/firefox-css/css/lycium_vscode-light.css",
         "Dark": "/home/binaryink/Dev/Personal/firefox-css/css/lycium_vscode-dark.css"
+      }
+    },
+    {
+      "appName": "Thunderbird",
+      "type": "Symlink",
+      "path": "/home/binaryink/Dev/Personal/thunderbird-css/userChrome.css",
+      "modes": {
+        "Light": "/home/binaryink/Dev/Personal/thunderbird-css/css/velora-vscode-light.css",
+        "Dark": "/home/binaryink/Dev/Personal/thunderbird-css/css/velora-vscode-dark.css"
       }
     }
   ]
