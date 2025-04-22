@@ -1,12 +1,22 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [Version 1.1.1](#version-111)
+  - [Version 1.1.0](#version-110)
   - [Version 1.0.2](#version-102)
     - [Features](#features)
     - [Changes](#changes)
   - [Version 1.0.1](#version-101)
     - [Features](#features-1)
   - [Version 1.0.0](#version-100)
+
+## Version 1.1.1
+
+**2025-04-22**
+
+- `config.json`
+  - Changed Dunst to symlink, updated path
+  - Added Thunderbird
 
 ## Version 1.1.0
 
