@@ -207,10 +207,10 @@ function Set-HyprlandTheme {
     $OptionalCliUtilities = [Dictionary[string, bool]]::new()
     $AppsNotFound = [List[string]]::new()
 
-    if (($DebugPreference -ne 'Continue' -or $VerbosePreference -ne 'Continue') `
+    if (($DebugPreference -ne 'SilentlyContinue' -or $VerbosePreference -ne 'SilentlyContinue') `
         -and ($Quiet -or $Silent)) {
       Write-Warning -join @(
-        "Debug/Verbose preference are not 'Continue' and -Quiet ",
+        "Debug/Verbose preference are not 'SilentlyContinue' and -Quiet ",
         'and/or -Silent was passed; -Quiet and/or -Silent are being ignored.'
       )
       $Quiet = $false
