@@ -39,6 +39,14 @@
 .Parameter ConfigPath
   The path to the configuration JSON file.
 
+.Parameter Quiet
+  Reduce output by preventing appnames from being printed when processed. If
+  verbose or debug are enabled, this has no effect.
+
+.Parameter Silent
+  Silence all output of the script; this implies -Quiet. If verbose or debug are
+  enabled, this has no effect.
+
 .Example
   # Run with implicit config file, setting the theme mode to 'Dark'
   ./Set-HyprlandTheme.ps1 Dark
@@ -67,7 +75,8 @@ param(
   [Parameter(
     Mandatory = $true, 
     Position = 0,
-    HelpMessage = 'The mode to switch to (as defined in config.json)')]
+    HelpMessage = 'The mode to switch to (as defined in config.json)'
+  )]
   [string]
   $Mode,
 
@@ -75,9 +84,27 @@ param(
   [Parameter(
     Mandatory = $false, 
     Position = 1,
-    HelpMessage = 'Path to configuration file')]
+    HelpMessage = 'Path to configuration file'
+  )]
   [string]
-  $ConfigPath
+  $ConfigPath,
+
+  # Prevent app names from being printed, results in only a single message sent
+  # to stdout.
+  [Parameter(
+    Mandatory = $false,
+    HelpMessage = 'Reduce output by preventing appnames from being printed when processed.'
+  )]
+  [switch]
+  $Quiet,
+
+  # Prevent all output to stdout
+  [Parameter(
+    Mandatory = $false,
+    HelpMessage = 'Silence all output of the script.'
+  )]
+  [switch]
+  $Silent
 )
 
 <#
@@ -96,6 +123,14 @@ param(
 
 .Parameter ConfigPath
   The path to the configuration JSON file.
+
+.Parameter Quiet
+  Reduce output by preventing appnames from being printed when processed. If
+  verbose or debug are enabled, this has no effect.
+
+.Parameter Silent
+  Silence all output of the script; this implies -Quiet. If verbose or debug are
+  enabled, this has no effect.
 
 .Example
   # Run with implicit config file, setting the theme mode to 'Dark'
@@ -133,7 +168,24 @@ function Set-HyprlandTheme {
       Position = 1,
       HelpMessage = 'Path to configuration file')]
     [string]
-    $ConfigPath
+    $ConfigPath,
+
+    # Prevent app names from being printed, results in only a single message sent
+    # to stdout.
+    [Parameter(
+      Mandatory = $false,
+      HelpMessage = 'Reduce output by preventing appnames from being printed when processed.'
+    )]
+    [switch]
+    $Quiet,
+  
+    # Prevent all output to stdout
+    [Parameter(
+      Mandatory = $false,
+      HelpMessage = 'Silence all output of the script.'
+    )]
+    [switch]
+    $Silent
   )
 
   begin {
@@ -155,6 +207,18 @@ function Set-HyprlandTheme {
     $OptionalCliUtilities = [Dictionary[string, bool]]::new()
     $AppsNotFound = [List[string]]::new()
 
+    if (($DebugPreference -ne 'Continue' -or $VerbosePreference -ne 'Continue') `
+        -and ($Quiet -or $Silent)) {
+      Write-Warning -join @(
+        "Debug/Verbose preference are not 'Continue' and -Quiet ",
+        'and/or -Silent was passed; -Quiet and/or -Silent are being ignored.'
+      )
+      $Quiet = $false
+      $Silent = $false
+    }
+
+    if ($Silent) { $Quiet = $true }
+    
     foreach ($cmd in $OptionalCliUtilityList) {
       if (which $cmd) {
         Write-Debug "Optional CLI Utility '$cmd' found."
@@ -215,9 +279,13 @@ function Set-HyprlandTheme {
   }
 
   process {
-    Write-Host "Switching applications to '$Mode' Mode..."
+    if (!$Silent) {
+      Write-Host "Switching applications to '$Mode' Mode..."
+    }
     foreach ($item in $Config.applications) {
-      Write-Host "$($item.appName)"
+      if (!$Quiet) {
+        Write-Host "$($item.appName)"
+      }
 
       if ($AppsNotFound -contains $item.appName) { continue }
 
