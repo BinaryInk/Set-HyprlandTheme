@@ -215,8 +215,9 @@ function Set-HyprlandTheme {
   }
 
   process {
+    Write-Host "Switching applications to '$Mode' Mode..."
     foreach ($item in $Config.applications) {
-      Write-Host "Switching '$($item.appName)' to '$Mode' Mode..."
+      Write-Host "$($item.appName)"
 
       if ($AppsNotFound -contains $item.appName) { continue }
 
@@ -226,9 +227,9 @@ function Set-HyprlandTheme {
         if ($PSCmdlet.ShouldProcess('This Computer', "Invoke Expression: ""$($item.preCommand)""")) {
           try {
             Write-Verbose "Invoking user-provided preCommand '$($item.preCommand)'..."
-            Write-Host "precommand: $(Invoke-Expression -Command $item.preCommand `
-                                                                    -Verbose:$VerbosePreference `
-                                                                    -Debug:$DebugPreference )"
+            Write-Verbose "precommand: $(Invoke-Expression -Command $item.preCommand `
+                                                        -Verbose:$VerbosePreference `
+                                                        -Debug:$DebugPreference )"
           }
           catch {
             Write-Error "Unable to execute user-provided preCommand '$($item.preCommand)'."
@@ -259,9 +260,9 @@ function Set-HyprlandTheme {
             if ($PSCmdlet.ShouldProcess('KDE', "Apply ""$Mode"" Color Scheme")) {
               try {
                 Write-Debug "Invoking expression: '$cmd'."
-                Write-Host "plasma-apply-colorscheme: $(Invoke-Expression $cmd `
-                                                                            -Verbose:$VerbosePreference `
-                                                                            -Debug:$DebugPreference)"
+                Write-Verbose "plasma-apply-colorscheme: $(Invoke-Expression $cmd `
+                                                                             -Verbose:$VerbosePreference `
+                                                                             -Debug:$DebugPreference)"
                 if ($LASTEXITCODE -ne 0) { throw } 
               }
               catch { 
@@ -279,8 +280,8 @@ function Set-HyprlandTheme {
             if ($PSCmdlet.ShouldProcess('GTK', """$Mode"" Theme")) {
               try {
                 Write-Debug "Invoking expression: '$cmd'."
-                Write-Host "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
-                                                                                -Debug:$DebugPreference)"
+                Write-Verbose "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                   -Debug:$DebugPreference)"
                 if ($LASTEXITCODE -ne 0) { throw }
               }
               catch {
@@ -318,8 +319,8 @@ function Set-HyprlandTheme {
             if ($PSCmdlet.ShouldProcess('GTK Cursor', "Set Cursor to $gsettingsMode")) {
               try {
                 Write-Verbose "Invoking expression: '$cmd'."
-                Write-Host "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
-                                                                                -Debug:$DebugPreference)"
+                Write-Verbose "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                   -Debug:$DebugPreference)"
                 if ($LASTEXITCODE -ne 0) { throw }
               }
               catch {
@@ -332,7 +333,7 @@ function Set-HyprlandTheme {
             $cmd = "hyprctl setcursor $($item.modes.$Mode)"
             try { 
               Write-Verbose "Invoking expression: '$cmd'."
-              Write-Host 'hyprctl: ' -NoNewline
+              Write-Verbose 'hyprctl: ' -NoNewline
               Invoke-Expression $cmd -Verbose:$VerbosePreference `
                 -Debug:$DebugPreference
               if ($LASTEXITCODE -ne 0) { throw }
@@ -363,7 +364,9 @@ function Set-HyprlandTheme {
             New-Item -ItemType 'SymbolicLink' `
               -Path "$(Resolve-Path $item.path)" `
               -Value "$(Resolve-Path $item.modes.$Mode)" `
-              -Force
+              -Force | Out-Null
+            
+            Write-Verbose "Symbolic Link: $(Resolve-Path $item.path) -> $(Resolve-Path $item.modes.$Mode)"
           }
         }
         Default {
@@ -376,9 +379,9 @@ function Set-HyprlandTheme {
         if ($PSCmdlet.ShouldProcess('This Computer', "Invoke Expression: ""$($item.postCommand)""")) {
           try {
             Write-Verbose "Invoking user-provided postCommand '$($item.postCommand)'."
-            Write-Host "postCommand: $(Invoke-Expression -Command $item.postCommand `
-                                                                    -Verbose:$VerbosePreference `
-                                                                    -Debug:$DebugPreference)"
+            Write-Verbose "postCommand: $(Invoke-Expression -Command $item.postCommand `
+                                                            -Verbose:$VerbosePreference `
+                                                            -Debug:$DebugPreference)"
           }
           catch {
             Write-Error "Unable to execute user-provided postCommand '$($item.postCommand)'."
