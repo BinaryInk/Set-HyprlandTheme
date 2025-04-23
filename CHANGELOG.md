@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [Version 1.2.0](#version-120)
   - [Version 1.1.1](#version-111)
   - [Version 1.1.0](#version-110)
   - [Version 1.0.2](#version-102)
@@ -9,6 +10,23 @@
   - [Version 1.0.1](#version-101)
     - [Features](#features-1)
   - [Version 1.0.0](#version-100)
+
+## Version 1.2.0
+
+**2025-04-22**
+
+- Added `-Quiet` switch: Prevents output of app names when as are processed.
+- Added `-Silent` switch: Prevents all stdout output; implies `-Quiet`
+- Stdout cleaned up:
+  - Moved stdout from 'Invoke-Expression' commands (e.g., preCommand,
+    postCommand, etc.) to verbose output
+  - Sent output from 'SymLink' to null, offer a similar, shorter message via
+    Verbose
+  - Changed messaging to only mention the mode being changed to once and instead
+    only show the appname per-app
+- For 'SymLink', `Resolve-Path` is now used to create a fully qualified path
+  when executing `New-Item` so aliases like `~` can be used in paths without
+  resulting in an invalid symbolic link.
 
 ## Version 1.1.1
 

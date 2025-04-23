@@ -39,6 +39,14 @@
 .Parameter ConfigPath
   The path to the configuration JSON file.
 
+.Parameter Quiet
+  Reduce output by preventing appnames from being printed when processed. If
+  verbose or debug are enabled, this has no effect.
+
+.Parameter Silent
+  Silence all output of the script; this implies -Quiet. If verbose or debug are
+  enabled, this has no effect.
+
 .Example
   # Run with implicit config file, setting the theme mode to 'Dark'
   ./Set-HyprlandTheme.ps1 Dark
@@ -67,7 +75,8 @@ param(
   [Parameter(
     Mandatory = $true, 
     Position = 0,
-    HelpMessage = 'The mode to switch to (as defined in config.json)')]
+    HelpMessage = 'The mode to switch to (as defined in config.json)'
+  )]
   [string]
   $Mode,
 
@@ -75,9 +84,27 @@ param(
   [Parameter(
     Mandatory = $false, 
     Position = 1,
-    HelpMessage = 'Path to configuration file')]
+    HelpMessage = 'Path to configuration file'
+  )]
   [string]
-  $ConfigPath
+  $ConfigPath,
+
+  # Prevent app names from being printed, results in only a single message sent
+  # to stdout.
+  [Parameter(
+    Mandatory = $false,
+    HelpMessage = 'Reduce output by preventing appnames from being printed when processed.'
+  )]
+  [switch]
+  $Quiet,
+
+  # Prevent all output to stdout
+  [Parameter(
+    Mandatory = $false,
+    HelpMessage = 'Silence all output of the script.'
+  )]
+  [switch]
+  $Silent
 )
 
 <#
@@ -96,6 +123,14 @@ param(
 
 .Parameter ConfigPath
   The path to the configuration JSON file.
+
+.Parameter Quiet
+  Reduce output by preventing appnames from being printed when processed. If
+  verbose or debug are enabled, this has no effect.
+
+.Parameter Silent
+  Silence all output of the script; this implies -Quiet. If verbose or debug are
+  enabled, this has no effect.
 
 .Example
   # Run with implicit config file, setting the theme mode to 'Dark'
@@ -133,7 +168,24 @@ function Set-HyprlandTheme {
       Position = 1,
       HelpMessage = 'Path to configuration file')]
     [string]
-    $ConfigPath
+    $ConfigPath,
+
+    # Prevent app names from being printed, results in only a single message sent
+    # to stdout.
+    [Parameter(
+      Mandatory = $false,
+      HelpMessage = 'Reduce output by preventing appnames from being printed when processed.'
+    )]
+    [switch]
+    $Quiet,
+  
+    # Prevent all output to stdout
+    [Parameter(
+      Mandatory = $false,
+      HelpMessage = 'Silence all output of the script.'
+    )]
+    [switch]
+    $Silent
   )
 
   begin {
@@ -155,12 +207,26 @@ function Set-HyprlandTheme {
     $OptionalCliUtilities = [Dictionary[string, bool]]::new()
     $AppsNotFound = [List[string]]::new()
 
+    if (($DebugPreference -ne 'Continue' -or $VerbosePreference -ne 'Continue') `
+        -and ($Quiet -or $Silent)) {
+      Write-Warning -join @(
+        "Debug/Verbose preference are not 'Continue' and -Quiet ",
+        'and/or -Silent was passed; -Quiet and/or -Silent are being ignored.'
+      )
+      $Quiet = $false
+      $Silent = $false
+    }
+
+    if ($Silent) { $Quiet = $true }
+    
     foreach ($cmd in $OptionalCliUtilityList) {
       if (which $cmd) {
         Write-Debug "Optional CLI Utility '$cmd' found."
       }
       else {
-        Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+        if ($Silent) {
+          Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+        }
       }
       $OptionalCliUtilities.Add($cmd, $found)
     }
@@ -208,15 +274,22 @@ function Set-HyprlandTheme {
         continue
       }
       if (!$(Test-Path $item.path)) {
-        Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
+        if ($Silent) {
+          Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
+        }
         $AppsNotFound.Add($item.appName)
       }
     }
   }
 
   process {
+    if (!$Silent) {
+      Write-Host "Switching applications to '$Mode' Mode..."
+    }
     foreach ($item in $Config.applications) {
-      Write-Host "Switching '$($item.appName)' to '$Mode' Mode..."
+      if (!$Quiet) {
+        Write-Host "$($item.appName)"
+      }
 
       if ($AppsNotFound -contains $item.appName) { continue }
 
@@ -226,13 +299,15 @@ function Set-HyprlandTheme {
         if ($PSCmdlet.ShouldProcess('This Computer', "Invoke Expression: ""$($item.preCommand)""")) {
           try {
             Write-Verbose "Invoking user-provided preCommand '$($item.preCommand)'..."
-            Write-Host "precommand: $(Invoke-Expression -Command $item.preCommand `
-                                                                    -Verbose:$VerbosePreference `
-                                                                    -Debug:$DebugPreference )"
+            Write-Verbose "precommand: $(Invoke-Expression -Command $item.preCommand `
+                                                        -Verbose:$VerbosePreference `
+                                                        -Debug:$DebugPreference )"
           }
           catch {
             Write-Error "Unable to execute user-provided preCommand '$($item.preCommand)'."
-            Write-Warning "Skipping $($item.appName)!"
+            if ($Silent) {
+              Write-Warning "Skipping $($item.appName)!"
+            }
             continue
           }
         }
@@ -259,9 +334,9 @@ function Set-HyprlandTheme {
             if ($PSCmdlet.ShouldProcess('KDE', "Apply ""$Mode"" Color Scheme")) {
               try {
                 Write-Debug "Invoking expression: '$cmd'."
-                Write-Host "plasma-apply-colorscheme: $(Invoke-Expression $cmd `
-                                                                            -Verbose:$VerbosePreference `
-                                                                            -Debug:$DebugPreference)"
+                Write-Verbose "plasma-apply-colorscheme: $(Invoke-Expression $cmd `
+                                                                             -Verbose:$VerbosePreference `
+                                                                             -Debug:$DebugPreference)"
                 if ($LASTEXITCODE -ne 0) { throw } 
               }
               catch { 
@@ -279,8 +354,8 @@ function Set-HyprlandTheme {
             if ($PSCmdlet.ShouldProcess('GTK', """$Mode"" Theme")) {
               try {
                 Write-Debug "Invoking expression: '$cmd'."
-                Write-Host "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
-                                                                                -Debug:$DebugPreference)"
+                Write-Verbose "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                   -Debug:$DebugPreference)"
                 if ($LASTEXITCODE -ne 0) { throw }
               }
               catch {
@@ -318,8 +393,8 @@ function Set-HyprlandTheme {
             if ($PSCmdlet.ShouldProcess('GTK Cursor', "Set Cursor to $gsettingsMode")) {
               try {
                 Write-Verbose "Invoking expression: '$cmd'."
-                Write-Host "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
-                                                                                -Debug:$DebugPreference)"
+                Write-Verbose "gsettings: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                                   -Debug:$DebugPreference)"
                 if ($LASTEXITCODE -ne 0) { throw }
               }
               catch {
@@ -332,7 +407,7 @@ function Set-HyprlandTheme {
             $cmd = "hyprctl setcursor $($item.modes.$Mode)"
             try { 
               Write-Verbose "Invoking expression: '$cmd'."
-              Write-Host 'hyprctl: ' -NoNewline
+              Write-Verbose 'hyprctl: ' -NoNewline
               Invoke-Expression $cmd -Verbose:$VerbosePreference `
                 -Debug:$DebugPreference
               if ($LASTEXITCODE -ne 0) { throw }
@@ -360,7 +435,12 @@ function Set-HyprlandTheme {
               $item.path,
               "Replace file or symbolic link with `"$($item.modes.$($Mode))`".")
           ) {
-            New-Item -ItemType SymbolicLink -Path $item.path -Value $item.modes.$Mode -Force
+            New-Item -ItemType 'SymbolicLink' `
+              -Path "$(Resolve-Path $item.path)" `
+              -Value "$(Resolve-Path $item.modes.$Mode)" `
+              -Force | Out-Null
+            
+            Write-Verbose "Symbolic Link: $(Resolve-Path $item.path) -> $(Resolve-Path $item.modes.$Mode)"
           }
         }
         Default {
@@ -373,13 +453,15 @@ function Set-HyprlandTheme {
         if ($PSCmdlet.ShouldProcess('This Computer', "Invoke Expression: ""$($item.postCommand)""")) {
           try {
             Write-Verbose "Invoking user-provided postCommand '$($item.postCommand)'."
-            Write-Host "postCommand: $(Invoke-Expression -Command $item.postCommand `
-                                                                    -Verbose:$VerbosePreference `
-                                                                    -Debug:$DebugPreference)"
+            Write-Verbose "postCommand: $(Invoke-Expression -Command $item.postCommand `
+                                                            -Verbose:$VerbosePreference `
+                                                            -Debug:$DebugPreference)"
           }
           catch {
             Write-Error "Unable to execute user-provided postCommand '$($item.postCommand)'."
-            Write-Warning "Please check the state of $($item.appName) due to this failure."
+            if ($Silent) {
+              Write-Warning "Please check the state of $($item.appName) due to this failure."
+            }
             continue
           }
         }

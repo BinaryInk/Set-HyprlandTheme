@@ -54,11 +54,9 @@ The config file allows for the following configuration types:
   - Creates a symbolic link or overwrites an existing file or symbolic link,
     using the `path` value as the symbolic link and the values under `mode` as
     the targets.
-    - IMPORTANT: You must use fully-qualified paths *or* valid relative paths 
+    - You *should* use fully-qualified paths *or* valid relative paths 
       according to the location of the symbolic link being created when using 
-      this; there are currently no checks to ensure a symbolic link is valid nor
-      expansion of environment variables (or aliases, such as `~`) prior to the 
-      creation of the symbolic link.
+      this option.
 
 With the above types provided, one should be able to create a fairly thorough
 solution for their setup. GTK and KDE provide the ability for QT and GTK apps to
@@ -113,6 +111,12 @@ type will have no effect.
 
 # Dry run
 ./Set-HyprlandTheme.ps1 Light -WhatIf
+
+# Prevent output of each config entry processed
+./Set-HyprlandTheme.ps1 Light -Quiet
+
+# Prevent *all* output (except errors)
+./Set-HyprlandTheme.ps1 Dark -Silent
 ```
 
 ### Dot-sourcing
