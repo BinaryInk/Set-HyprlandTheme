@@ -2,7 +2,7 @@
 
 <#
     Set-HyprlandTheme.ps1 - A PowerShell Script for Automating Hyprland Themes
-    Copyright (C) 2024  BinaryInk
+    Copyright (C) 2025  BinaryInk
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
