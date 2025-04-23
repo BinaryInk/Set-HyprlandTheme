@@ -224,7 +224,9 @@ function Set-HyprlandTheme {
         Write-Debug "Optional CLI Utility '$cmd' found."
       }
       else {
-        Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+        if ($Silent) {
+          Write-Warning "Optional CLI Utility '$cmd' not found, some features may not work as expected."
+        }
       }
       $OptionalCliUtilities.Add($cmd, $found)
     }
@@ -272,7 +274,9 @@ function Set-HyprlandTheme {
         continue
       }
       if (!$(Test-Path $item.path)) {
-        Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
+        if ($Silent) {
+          Write-Warning "$($item.appName): Configuration file not found at '$($item.path)'!"
+        }
         $AppsNotFound.Add($item.appName)
       }
     }
@@ -301,7 +305,9 @@ function Set-HyprlandTheme {
           }
           catch {
             Write-Error "Unable to execute user-provided preCommand '$($item.preCommand)'."
-            Write-Warning "Skipping $($item.appName)!"
+            if ($Silent) {
+              Write-Warning "Skipping $($item.appName)!"
+            }
             continue
           }
         }
@@ -453,7 +459,9 @@ function Set-HyprlandTheme {
           }
           catch {
             Write-Error "Unable to execute user-provided postCommand '$($item.postCommand)'."
-            Write-Warning "Please check the state of $($item.appName) due to this failure."
+            if ($Silent) {
+              Write-Warning "Please check the state of $($item.appName) due to this failure."
+            }
             continue
           }
         }
