@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [Version 1.1.2](#version-112)
   - [Version 1.1.1](#version-111)
   - [Version 1.1.0](#version-110)
   - [Version 1.0.2](#version-102)
@@ -9,6 +10,13 @@
   - [Version 1.0.1](#version-101)
     - [Features](#features-1)
   - [Version 1.0.0](#version-100)
+
+## Version 1.1.2
+
+**2025-04-22**
+
+- For 'SymLink', `Resolve-Path` is now used to create a fully qualified path so
+  aliases like `~` can be used in paths.
 
 ## Version 1.1.1
 

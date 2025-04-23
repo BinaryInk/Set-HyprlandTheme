@@ -360,7 +360,10 @@ function Set-HyprlandTheme {
               $item.path,
               "Replace file or symbolic link with `"$($item.modes.$($Mode))`".")
           ) {
-            New-Item -ItemType SymbolicLink -Path $item.path -Value $item.modes.$Mode -Force
+            New-Item -ItemType 'SymbolicLink' `
+              -Path "$(Resolve-Path $item.path)" `
+              -Value "$(Resolve-Path $item.modes.$Mode)" `
+              -Force
           }
         }
         Default {
