@@ -49,91 +49,6 @@
 
 .Example
   # Run with implicit config file, setting the theme mode to 'Dark'
-  ./Set-HyprlandTheme.ps1 Dark
-
-.Example
-  # Run specifying the location of the config file, setting the theme mode to 'MyTheme'
-  ./Set-HyprlandTheme.ps1 -Mode 'MyTheme' -Config '~/.myConfig.json'
-
-.Example
-  # Run with verbose output
-  ./Set-HyprlandTheme.ps1 Dark -Verbose
-
-.Example
-  # Dry run using -WhatIf
-  ./Set-HyprlandTheme.ps1 Dark -WhatIf
-
-.Example
-  # Dot-source the function from the script (Important: You must provide a value for -Mode)
-  . ./Set-HyprlandTheme.ps1 FillerValue
-  # Run the imported function.
-  Set-HyprlandTheme Dark
-#>
-using namespace System.Collections.Generic
-param(
-  # Theme mode to apply
-  [Parameter(
-    Mandatory = $true, 
-    Position = 0,
-    HelpMessage = 'The mode to switch to (as defined in config.json)'
-  )]
-  [string]
-  $Mode,
-
-  # Config file path
-  [Parameter(
-    Mandatory = $false, 
-    Position = 1,
-    HelpMessage = 'Path to configuration file'
-  )]
-  [string]
-  $ConfigPath,
-
-  # Prevent app names from being printed, results in only a single message sent
-  # to stdout.
-  [Parameter(
-    Mandatory = $false,
-    HelpMessage = 'Reduce output by preventing appnames from being printed when processed.'
-  )]
-  [switch]
-  $Quiet,
-
-  # Prevent all output to stdout
-  [Parameter(
-    Mandatory = $false,
-    HelpMessage = 'Silence all output of the script.'
-  )]
-  [switch]
-  $Silent
-)
-
-<#
-.Synopsis
-  Changes themes according to settings specified in a specially-crafted JSON
-  file.
-
-.Description
-  Changes various theme files and executes specific commands defined in a JSON
-  file. This can include custom scripts and commands, in addition to leveraging
-  commandline applications such as 'gsettings' directoy.
-
-.Parameter Mode
-  The mode to change the theme to. The Mode specified must be included in each
-  entry in the configuration JSON file.
-
-.Parameter ConfigPath
-  The path to the configuration JSON file.
-
-.Parameter Quiet
-  Reduce output by preventing appnames from being printed when processed. If
-  verbose or debug are enabled, this has no effect.
-
-.Parameter Silent
-  Silence all output of the script; this implies -Quiet. If verbose or debug are
-  enabled, this has no effect.
-
-.Example
-  # Run with implicit config file, setting the theme mode to 'Dark'
   Set-HyprlandTheme.ps1 Dark
 
 .Example
@@ -148,6 +63,7 @@ param(
   # Dry run using -WhatIf
   Set-HyprlandTheme.ps1 Dark -WhatIf
 #>
+
 function Set-HyprlandTheme {
   [CmdletBinding(
     SupportsShouldProcess = $true
@@ -204,8 +120,8 @@ function Set-HyprlandTheme {
       'plasma-apply-colorscheme'
     )
     [psobject]$Config
-    $OptionalCliUtilities = [Dictionary[string, bool]]::new()
-    $AppsNotFound = [List[string]]::new()
+    $OptionalCliUtilities = [System.Collections.Generic.Dictionary[string, bool]]::new()
+    $AppsNotFound = [System.Collections.Generic.List[string]]::new()
 
     if (($DebugPreference -ne 'SilentlyContinue' -or $VerbosePreference -ne 'SilentlyContinue') `
         -and ($Quiet -or $Silent)) {
@@ -470,12 +386,4 @@ function Set-HyprlandTheme {
   }
 
   end {}
-}
-
-# Allow for importing or direct execution
-if ($MyInvocation.InvocationName -eq '.') {
-  Write-Verbose '''Set-HyprlandTheme'' added to current session scope.'
-} 
-else {
-  Set-HyprlandTheme @PSBoundParameters
 }
