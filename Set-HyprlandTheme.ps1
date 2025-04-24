@@ -323,9 +323,8 @@ function Set-HyprlandTheme {
             $cmd = "hyprctl setcursor $($item.modes.$Mode)"
             try { 
               Write-Verbose "Invoking expression: '$cmd'."
-              Write-Verbose 'hyprctl: ' -NoNewline
-              Invoke-Expression $cmd -Verbose:$VerbosePreference `
-                -Debug:$DebugPreference
+              Write-Verbose "hyprctl: $(Invoke-Expression $cmd -Verbose:$VerbosePreference `
+                                                               -Debug:$DebugPreference)"
               if ($LASTEXITCODE -ne 0) { throw }
             }
             catch { 
