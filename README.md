@@ -9,8 +9,6 @@ A PowerShell Script for Automating Themes in Hyprland
     - [Required](#required)
     - [Optional](#optional)
   - [How to use](#how-to-use)
-    - [Running directly from script](#running-directly-from-script)
-    - [Dot-sourcing](#dot-sourcing)
   - [The Configuration File](#the-configuration-file)
     - [Properties](#properties)
     - [Mode purpose by type](#mode-purpose-by-type)
@@ -90,50 +88,35 @@ type will have no effect.
 
 ## How to use
 
-### Running directly from script
-
 1. Download the `Set-HyprlandTheme.ps1` script and place in a directory of your
    choosing.
 2. Ensure the script is executable: `chmod +x Set-HyprlandTheme.ps1`
 3. Set up a `config.json` file in one of the four recommended locations or
    specify path via parameter (See [The Config File](#the-config-file) below)
-4. Run the script
+4. Dot-source the script
+5. Run the script from the session it was dot-sourced into.
 
 ```powershell
+# FIRST: Dot-source
+. ./Set-HyprlandTheme.ps1
+
 # Run with implicit config file, setting the theme mode to 'Dark'
-./Set-HyprlandTheme.ps1 Dark
+Set-HyprlandTheme Dark
 
 # Run specifying the location of the config file, setting the theme mode to 'MyTheme'
-./Set-HyprlandTheme.ps1 -Mode 'MyTheme' -Config '~/myConfig.json'
+Set-HyprlandTheme -Mode 'MyTheme' -Config '~/myConfig.json'
 
 # Run with verbose output
-./Set-HyprlandTheme.ps1 Dark -Verbose
+Set-HyprlandTheme Dark -Verbose
 
 # Dry run
-./Set-HyprlandTheme.ps1 Light -WhatIf
+Set-HyprlandTheme Light -WhatIf
 
 # Prevent output of each config entry processed
-./Set-HyprlandTheme.ps1 Light -Quiet
+Set-HyprlandTheme Light -Quiet
 
 # Prevent *all* output (except errors)
-./Set-HyprlandTheme.ps1 Dark -Silent
-```
-
-### Dot-sourcing
-
-This script can also be dot-sourced into a session's scope; this can be useful
-for including in a user profile. 
-
-> **IMPORTANT:** 
-> 
-> Due to the inclusion of a mandatory parameter, you **must**
-> specify `-Mode` when dot-sourcing the script. The value passed to `-Mode` is
-> irrelevant and has no effect on the imported function. See the example below.
-
-```powershell
-# Import function to shell and then run (importing can be useful to add to your profile)
-. ~/my/custom/path/Set-HyprlandTheme.ps1 -Mode 'ThisValueIsDiscarded'
-Set-HyprlandTheme Ayu
+Set-HyprlandTheme Dark -Silent
 ```
 
 ## The Configuration File
