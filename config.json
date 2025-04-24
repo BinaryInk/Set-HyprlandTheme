@@ -45,11 +45,11 @@
     },
     {
       "appName": "GTK4-css",
-      "type": "Replace_File",
+      "type": "SymLink",
       "path": "/home/binaryink/.config/gtk-4.0/gtk.css",
       "modes": {
-        "Light": "/home/binaryink/.config/gtk-4.0/colors-light.css",
-        "Dark": "/home/binaryink/.config/gtk-4.0/colors-dark.css"
+        "Light": "/usr/share/themes/Materia-light-compact/gtk-4.0/gtk.css",
+        "Dark": "/usr/share/themes/Materia-light-compact/gtk-4.0/gtk.css"
       },
       "preCommand": "",
       "postCommand": ""
