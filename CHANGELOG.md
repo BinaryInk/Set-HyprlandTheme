@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [Version 1.2.1](#version-121)
   - [Version 1.2.0](#version-120)
   - [Version 1.1.1](#version-111)
   - [Version 1.1.0](#version-110)
@@ -11,9 +12,21 @@
     - [Features](#features-1)
   - [Version 1.0.0](#version-100)
 
+## Version 1.2.1
+
+- Fixed `$DebugPreferences`/`$VerbosePreferences` check from `Continue` to
+  `SilentlyContinue` when `-Quiet` or `-Silent` is passed.
+- Removed hybrid script/dot-sourcing functionality
+  - It turns out this only worked in an interactive session, thus could not be
+    dot-sourced via script (i.e., profile). Rather than maintain it or attempt
+    to find a fix, removing altogether as it was a somewhat hacky solution to
+    begin with.
+- Removed `-NoNewLine` from a `Write-Verbose` call that used to be a
+  `Write-Host` call, introduced in 1.2.0.
+
 ## Version 1.2.0
 
-**2025-04-22**
+**2025-04-23**
 
 - Added `-Quiet` switch: Prevents output of app names when as are processed.
 - Added `-Silent` switch: Prevents all stdout output; implies `-Quiet`
